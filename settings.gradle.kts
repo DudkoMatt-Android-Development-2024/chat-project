@@ -21,3 +21,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "Chat Project"
 include(":app")
+include(":openapi")
