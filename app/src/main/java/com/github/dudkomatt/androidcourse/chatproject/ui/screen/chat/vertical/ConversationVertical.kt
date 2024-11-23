@@ -35,14 +35,20 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.github.dudkomatt.androidcourse.chatproject.R
+import com.github.dudkomatt.androidcourse.chatproject.model.MessageModel
 import com.github.dudkomatt.androidcourse.chatproject.ui.screen.component.ThumbProfileImage
 import com.github.dudkomatt.androidcourse.chatproject.ui.screen.component.TopAppBar
+import androidx.compose.foundation.lazy.items
+import kotlinx.datetime.LocalDateTime
+
 
 @Composable
 fun ConversationVertical(
     onBackClick: () -> Unit,
     onAttachImageClick: () -> Unit,
     onSendClick: () -> Unit,
+    loggedInUsername: String,
+    chatMessages: List<MessageModel>,
     modifier: Modifier = Modifier,
 ) {
     BackHandler {
@@ -68,13 +74,9 @@ fun ConversationVertical(
             modifier = Modifier.padding(innerPadding),
             verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
-            // TODO
-//            items(chatEntries, key = { it.from }) {
-//                ChatListEntry(
-//                    from = it.from,
-//                    lastMessage = it.lastMessage,
-//                )
-//            }
+            items(chatMessages, key = { it.id }) {
+
+            }
         }
     }
 }
@@ -150,7 +152,8 @@ fun ConversationBottomBar(
     Surface(
         modifier = modifier
             .fillMaxWidth()
-            .height(bottomHeightBar)
+            .height(bottomHeightBar),
+        tonalElevation = 16.dp
     ) {
         Row(
             modifier = Modifier.fillMaxSize(),
@@ -226,9 +229,44 @@ fun IconButtonWithCallback(
 @Composable
 @Preview
 fun ConversationVerticalPreview() {
+    val currentUsername = "username"
+    val anotherUser1 = "anotherUser1"
+    val anotherUser2 = "anotherUser2"
+
     ConversationVertical(
         onBackClick = {},
         onAttachImageClick = {},
-        onSendClick = {}
+        chatMessages = listOf(
+            MessageModel(
+                1,
+                anotherUser1,
+                currentUsername,
+                MessageModel.TextMessageInner(
+                    text = MessageModel.TextPayload("Incoming message")
+                ),
+                LocalDateTime(2024, 1, 1, 1, 1)
+            ),
+            MessageModel(
+                2,
+                currentUsername,
+                anotherUser1,
+                MessageModel.TextMessageInner(
+                    text = MessageModel.TextPayload("Outgoing message")
+                ),
+                LocalDateTime(2024, 1, 1, 1, 2)
+            ),
+            MessageModel(
+                3,
+                anotherUser2,
+                currentUsername,
+                MessageModel.TextMessageInner(
+                    text = MessageModel.TextPayload("Incoming message from another user with image"),
+                    image = MessageModel.ImagePayload("tool/tmp/scala-spiral.png")
+                ),
+                LocalDateTime(2024, 1, 1, 1, 2)
+            ),
+        ),
+        onSendClick = {},
+        loggedInUsername = currentUsername
     )
 }

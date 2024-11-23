@@ -28,5 +28,7 @@ data class MessageModel(
     @Serializable
     data class ImagePayload(
         val link: String
-    )
+    ) {
+        fun getLinkWithSeparator() = "/$link"
+    }
 }
