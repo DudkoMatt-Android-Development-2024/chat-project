@@ -1,4 +1,4 @@
-package com.github.dudkomatt.androidcourse.chatproject.ui.screen.chat.component
+package com.github.dudkomatt.androidcourse.chatproject.ui.screen.component
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -31,7 +31,7 @@ fun ChatListEntry(
             .padding(2.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        ThumbProfileImage(
+        ThumbProfileClickableImage(
             modifier = Modifier.padding(all = 2.dp),
             onImageClick = onImageClick
         )
