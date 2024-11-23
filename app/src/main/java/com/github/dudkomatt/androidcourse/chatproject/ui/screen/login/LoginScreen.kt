@@ -20,12 +20,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -33,15 +30,16 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.github.dudkomatt.androidcourse.chatproject.R
+import com.github.dudkomatt.androidcourse.chatproject.viewmodel.LoginViewModel
 
 @Composable
 fun LoginScreen(
-    modifier: Modifier = Modifier,
-    onSignIn: () -> Unit,
-    onRegister: () -> Unit
+    modifier: Modifier = Modifier
 ) {
     val scrollState = rememberScrollState()
+    val loginViewModel: LoginViewModel = viewModel()
 
     Column(
         modifier = modifier
@@ -64,12 +62,20 @@ fun LoginScreen(
 
         UsernameTextField(
             modifier = contentWidthModifier
-                .height(textFieldHeight)
+                .height(textFieldHeight),
+            login = loginViewModel.username,
+            onValueChange = loginViewModel::onUsernameChange
         )
         PasswordTextField(
             modifier = contentWidthModifier
-                .height(textFieldHeight)
+                .height(textFieldHeight),
+            password = loginViewModel.password,
+            onPasswordValueChange = loginViewModel::onPasswordChange,
+            isPasswordVisible = loginViewModel.isPasswordVisible,
+            onPasswordVisibilityToggle = loginViewModel::onPasswordVisibilityToggle
         )
+
+        val context = LocalContext.current
 
         Button(
             modifier = contentWidthModifier,
@@ -77,7 +83,7 @@ fun LoginScreen(
                 containerColor = MaterialTheme.colorScheme.primary
             ),
             content = { Text(stringResource(R.string.sign_in)) },
-            onClick = onSignIn
+            onClick = { loginViewModel.onSignIn(context) }
         )
 
         Button(
@@ -86,32 +92,38 @@ fun LoginScreen(
                 containerColor = MaterialTheme.colorScheme.secondary
             ),
             content = { Text(stringResource(R.string.register)) },
-            onClick = onRegister
+            onClick = { loginViewModel.onRegister(context) }
         )
     }
 }
 
 @Composable
-fun UsernameTextField(modifier: Modifier = Modifier) {
-    var login by rememberSaveable { mutableStateOf("") }
+fun UsernameTextField(
+    login: String,
+    onValueChange: (String) -> Unit,
+    modifier: Modifier = Modifier
+) {
     TextField(
         modifier = modifier,
         value = login,
-        onValueChange = { login = it },
+        onValueChange = onValueChange,
         label = { Text(stringResource(R.string.username)) },
         singleLine = true
     )
 }
 
 @Composable
-fun PasswordTextField(modifier: Modifier = Modifier) {
-    var password by rememberSaveable { mutableStateOf("") }
-    var isPasswordVisible by rememberSaveable { mutableStateOf(false) }
-
+fun PasswordTextField(
+    password: String,
+    onPasswordValueChange: (String) -> Unit,
+    isPasswordVisible: Boolean,
+    onPasswordVisibilityToggle: () -> Unit,
+    modifier: Modifier = Modifier
+) {
     TextField(
         modifier = modifier,
         value = password,
-        onValueChange = { password = it },
+        onValueChange = onPasswordValueChange,
         label = { Text(stringResource(R.string.password)) },
         singleLine = true,
         visualTransformation = if (isPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
@@ -126,7 +138,7 @@ fun PasswordTextField(modifier: Modifier = Modifier) {
                     R.string.show_password_hint
                 )
 
-            IconButton(onClick = { isPasswordVisible = !isPasswordVisible }) {
+            IconButton(onClick = onPasswordVisibilityToggle) {
                 Icon(imageVector = image, description)
             }
         }
@@ -136,8 +148,5 @@ fun PasswordTextField(modifier: Modifier = Modifier) {
 @Composable
 @Preview(showBackground = true)
 fun LoginScreenPreview() {
-    LoginScreen(
-        onSignIn = {},
-        onRegister = {}
-    )
+    LoginScreen()
 }

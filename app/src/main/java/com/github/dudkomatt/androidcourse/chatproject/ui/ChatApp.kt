@@ -17,14 +17,11 @@ fun ChatApp() {
                 .fillMaxSize()
                 .padding(innerPadding)
         ) {
-//            LoginScreen(
-//                onSignIn = {},  // TODO
-//                onRegister = {}
+            LoginScreen()
+//            ChatScreen(
+//                createNewChannel = {},
+//                createNewChat = {}
 //            )
-            ChatScreen(
-                createNewChannel = {},
-                createNewChat = {}
-            )
         }
     }
 }

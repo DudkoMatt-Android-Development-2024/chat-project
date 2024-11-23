@@ -58,6 +58,8 @@ dependencies {
     implementation(libs.converter.scalars)
     implementation(libs.kotlinx.datetime)
     implementation(libs.androidx.material.icons.extended)
+    implementation(libs.koin.androidx.compose)
+    implementation(libs.koin.androidx.compose.navigation)
 
     testImplementation(libs.junit)
 

@@ -1,5 +1,7 @@
 package com.github.dudkomatt.androidcourse.chatproject.viewmodel
 
+import android.content.Context
+import android.widget.Toast
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -23,5 +25,13 @@ class LoginViewModel : ViewModel() {
 
     fun onPasswordVisibilityToggle() {
         isPasswordVisible = !isPasswordVisible
+    }
+
+    fun onSignIn(context: Context) {
+        Toast.makeText(context, "Sign in clicked", Toast.LENGTH_SHORT).show()
+    }
+
+    fun onRegister(context: Context) {
+        Toast.makeText(context, "Register clicked", Toast.LENGTH_SHORT).show()
     }
 }
