@@ -7,4 +7,6 @@
     <string name="show_password_hint">Show password</string>
     <string name="sign_in">Sign In</string>
     <string name="register">Register</string>
+    <string name="chats_screen_title">Chats</string>
+    <string name="create_new_chat_or_channel_floating_action_button_description">Create new chat or channel</string>
 </resources>

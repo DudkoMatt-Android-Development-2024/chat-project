@@ -5,7 +5,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 
 @Composable
-fun ChatScreenHorizontal() {
+fun ChatScreenHorizontal(
+    createNewChatOrChannelFunction: () -> Unit,
+) {
     Row {
         Text("This is the horizontal screen")
         // ... other content for landscape orientation
