@@ -7,7 +7,7 @@ plugins {
 
 android {
     namespace = "com.github.dudkomatt.androidcourse.chatproject"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.github.dudkomatt.androidcourse.chatproject"
@@ -57,6 +57,7 @@ dependencies {
     implementation(libs.okhttp)
     implementation(libs.converter.scalars)
     implementation(libs.kotlinx.datetime)
+    implementation(libs.androidx.material.icons.extended)
 
     testImplementation(libs.junit)
 

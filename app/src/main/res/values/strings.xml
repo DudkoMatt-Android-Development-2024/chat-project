@@ -1,3 +1,10 @@
 <resources>
     <string name="app_name">Chat Project</string>
+    <string name="chat_project_title">Chat Project</string>
+    <string name="username">Username</string>
+    <string name="password">Password</string>
+    <string name="hide_password_hint">Hide password</string>
+    <string name="show_password_hint">Show password</string>
+    <string name="sign_in">Sign In</string>
+    <string name="register">Register</string>
 </resources>
