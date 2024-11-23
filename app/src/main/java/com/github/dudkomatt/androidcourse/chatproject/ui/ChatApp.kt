@@ -21,7 +21,10 @@ fun ChatApp() {
 //                onSignIn = {},  // TODO
 //                onRegister = {}
 //            )
-            ChatScreen {}
+            ChatScreen(
+                createNewChannel = {},
+                createNewChat = {}
+            )
         }
     }
 }

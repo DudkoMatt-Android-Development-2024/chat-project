@@ -8,8 +8,10 @@
     <string name="sign_in">Sign In</string>
     <string name="register">Register</string>
     <string name="chats_screen_title">Chats</string>
-    <string name="create_new_chat_or_channel_floating_action_button_description">Create new chat or channel</string>
+    <string name="create_new_chat_floating_action_button_description">Create new chat</string>
+    <string name="create_new_channel_floating_action_button_description">Create new channel</string>
     <string name="back_button_content_description">Return back</string>
     <string name="message">Enter message...</string>
     <string name="attach_iamge_button_content_description">Attach/detach image</string>
+    <string name="new_chat_screen_title">New Chat</string>
 </resources>

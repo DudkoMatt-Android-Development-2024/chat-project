@@ -9,16 +9,24 @@ import com.github.dudkomatt.androidcourse.chatproject.ui.screen.chat.vertical.Ch
 
 @Composable
 fun ChatScreen(
-    createNewChatOrChannelFunction: () -> Unit,
+    createNewChannel: () -> Unit,
+    createNewChat: () -> Unit,
 ) {
     val configuration = LocalConfiguration.current
 
     when (configuration.orientation) {
         Configuration.ORIENTATION_LANDSCAPE -> {
-            ChatScreenHorizontal(createNewChatOrChannelFunction)
+            ChatScreenHorizontal(
+                createNewChannel = createNewChannel,
+                createNewChat = createNewChat,
+            )
         }
+
         else -> {
-            ChatScreenVertical(createNewChatOrChannelFunction)
+            ChatScreenVertical(
+                createNewChannel = createNewChannel,
+                createNewChat = createNewChat,
+            )
         }
     }
 }
@@ -27,7 +35,8 @@ fun ChatScreen(
 @Preview(showBackground = true)
 fun ChatScreenPortraitPreview() {
     ChatScreen(
-        createNewChatOrChannelFunction = {}
+        createNewChannel = {},
+        createNewChat = {},
     )
 }
 
@@ -35,6 +44,7 @@ fun ChatScreenPortraitPreview() {
 @Preview(showBackground = true, device = "spec:parent=pixel_5,orientation=landscape")
 fun ChatScreenLandscapePreview() {
     ChatScreen(
-        createNewChatOrChannelFunction = {}
+        createNewChannel = {},
+        createNewChat = {},
     )
 }

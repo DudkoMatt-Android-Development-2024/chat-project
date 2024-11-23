@@ -8,12 +8,10 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.requiredHeightIn
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
-import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.filled.AttachFile
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -39,12 +37,12 @@ import com.github.dudkomatt.androidcourse.chatproject.model.MessageModel
 import com.github.dudkomatt.androidcourse.chatproject.ui.screen.component.ThumbProfileImage
 import com.github.dudkomatt.androidcourse.chatproject.ui.screen.component.TopAppBar
 import androidx.compose.foundation.lazy.items
-import androidx.compose.ui.unit.max
-import androidx.compose.ui.unit.min
 import com.github.dudkomatt.androidcourse.chatproject.ui.screen.chat.vertical.PreviewData.CURRENT_USERNAME
 import com.github.dudkomatt.androidcourse.chatproject.ui.screen.chat.vertical.PreviewData.getIncomingMessage
 import com.github.dudkomatt.androidcourse.chatproject.ui.screen.chat.vertical.PreviewData.getIncomingMessageWithImage
 import com.github.dudkomatt.androidcourse.chatproject.ui.screen.chat.vertical.PreviewData.getOutgoingMessage
+import com.github.dudkomatt.androidcourse.chatproject.ui.screen.component.ReturnBackTopBarButton
+import com.github.dudkomatt.androidcourse.chatproject.ui.screen.component.TopBarText
 import kotlinx.datetime.LocalDateTime
 
 
@@ -116,40 +114,12 @@ fun ConversationTopBar(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 ThumbProfileImage()
-                UsernameText(
-                    username = username
+                TopBarText(
+                    text = username
                 )
             }
         }
     }
-}
-
-@Composable
-fun ReturnBackTopBarButton(
-    onBackClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    IconButton(
-        modifier = modifier,
-        onClick = onBackClick
-    ) {
-        Icon(
-            imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
-            contentDescription = stringResource(id = R.string.back_button_content_description),
-            tint = MaterialTheme.colorScheme.onSurface
-        )
-    }
-}
-
-@Composable
-fun UsernameText(
-    username: String
-) {
-    Text(
-        modifier = Modifier.padding(12.dp),
-        text = username,
-        style = MaterialTheme.typography.titleLarge
-    )
 }
 
 @Composable

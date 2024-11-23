@@ -8,15 +8,21 @@ import com.github.dudkomatt.androidcourse.chatproject.model.ChatEntryModel
 
 @Composable
 fun ChatScreenVertical(
-    createNewChatOrChannelFunction: () -> Unit,
+    createNewChannel: () -> Unit,
+    createNewChat: () -> Unit,
     chatEntries: List<ChatEntryModel> = emptyList(),  // TODO - Remove default
     modifier: Modifier = Modifier
 ) {
     ChatListVertical(
-        createNewChatOrChannelFunction = createNewChatOrChannelFunction,
+        createNewChannel = createNewChannel,
+        createNewChat = createNewChat,
         chatEntries = chatEntries,
         modifier = modifier
     )
+
+    // TODO
+    // if selected
+//    ConversationVertical()
 }
 
 @Composable
@@ -25,7 +31,8 @@ fun ChatScreenVerticalPreview() {
     val loremIpsum = LoremIpsum(30)
 
     ChatScreenVertical(
-        createNewChatOrChannelFunction = {},
+        createNewChannel = {},
+        createNewChat = {},
         chatEntries = (1..20).map {
             ChatEntryModel("From $it", loremIpsum.values.joinToString())
         }

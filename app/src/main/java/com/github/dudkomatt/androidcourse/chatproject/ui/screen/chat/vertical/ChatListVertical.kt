@@ -1,12 +1,16 @@
 package com.github.dudkomatt.androidcourse.chatproject.ui.screen.chat.vertical
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Campaign
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.ModeEditOutline
 import androidx.compose.material.icons.filled.Textsms
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -28,7 +32,8 @@ import com.github.dudkomatt.androidcourse.chatproject.ui.screen.component.TopApp
 
 @Composable
 fun ChatListVertical(
-    createNewChatOrChannelFunction: () -> Unit,
+    createNewChannel: () -> Unit,
+    createNewChat: () -> Unit,
     chatEntries: List<ChatEntryModel> = emptyList(),  // TODO - Remove default
     modifier: Modifier = Modifier
 ) {
@@ -36,7 +41,10 @@ fun ChatListVertical(
         modifier = modifier
             .fillMaxSize(),
         topBar = { ChatListTopBar() },
-        floatingActionButton = { BottomFloatingActionButton(createNewChatOrChannelFunction) }
+        floatingActionButton = { BottomFloatingActionButton(
+            createNewChat = createNewChat,
+            createNewChannel = createNewChannel
+        ) }
     ) { innerPadding ->
         LazyColumn(
             modifier = Modifier.padding(innerPadding),
@@ -77,17 +85,32 @@ fun ChatListTopBar(
 
 @Composable
 fun BottomFloatingActionButton(
-    createNewChatOrChannelFunction: () -> Unit,
+    createNewChannel: () -> Unit,
+    createNewChat: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    FloatingActionButton(
-        modifier = modifier,
-        onClick = createNewChatOrChannelFunction
+    Column (
+        verticalArrangement = Arrangement.spacedBy(24.dp),
     ) {
-        Icon(
-            Icons.Default.Textsms,
-            contentDescription = stringResource(R.string.create_new_chat_or_channel_floating_action_button_description)
-        )
+        FloatingActionButton(
+            modifier = modifier,
+            onClick = createNewChannel
+        ) {
+            Icon(
+                Icons.Default.Campaign,
+                contentDescription = stringResource(R.string.create_new_channel_floating_action_button_description)
+            )
+        }
+
+        FloatingActionButton(
+            modifier = modifier,
+            onClick = createNewChat
+        ) {
+            Icon(
+                Icons.Default.Edit,
+                contentDescription = stringResource(R.string.create_new_chat_floating_action_button_description)
+            )
+        }
     }
 }
 
@@ -96,8 +119,9 @@ fun BottomFloatingActionButton(
 fun ChatListVerticalPreview() {
     val loremIpsum = LoremIpsum(30)
 
-    ChatScreenVertical(
-        createNewChatOrChannelFunction = {},
+    ChatListVertical(
+        createNewChannel = {},
+        createNewChat = {},
         chatEntries = (1..20).map {
             ChatEntryModel("From $it", loremIpsum.values.joinToString())
         }
