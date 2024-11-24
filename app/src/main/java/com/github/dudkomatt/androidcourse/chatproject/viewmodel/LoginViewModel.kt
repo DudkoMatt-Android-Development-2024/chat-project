@@ -38,35 +38,41 @@ class LoginViewModel(
     fun onSignIn(context: Context) {
         viewModelScope.launch {
             try {
-                val token: String? = authApi.loginPost(
+                val token: String = authApi.loginPost(
                     LoginRequest(
-                        _uiState.value.username,
-                        _uiState.value.password
+                        _uiState.value.username, _uiState.value.password
                     )
-                ).body()?.string()
-
-                if (token == null) {
-                    throw Exception("Token is null")
-                }
+                ).body()?.string() ?: throw Exception("Token is null")
 
                 Toast.makeText(
-                    context,
-                    "Sign in SUCCESS. Response: $token",
-                    Toast.LENGTH_LONG
-                )
-                    .show()
+                    context, "Sign in SUCCESS. Response: $token", Toast.LENGTH_LONG
+                ).show()
+
             } catch (e: Exception) {
                 Toast.makeText(
                     context,
                     "Sign in failed. Please try again. Error: ${e.message}",
                     Toast.LENGTH_LONG
-                )
-                    .show()
+                ).show()
             }
         }
     }
 
     fun onRegister(context: Context) {
-        Toast.makeText(context, "Register clicked", Toast.LENGTH_SHORT).show()
+        viewModelScope.launch {
+            try {
+                val responsePassword: String =
+                    authApi.registerNewUser(_uiState.value.username).body()?.string()
+                        ?: throw Exception("Returned password is null")
+
+                Toast.makeText(
+                    context, "Registration success. Response: $responsePassword", Toast.LENGTH_LONG
+                ).show()
+            } catch (e: Exception) {
+                Toast.makeText(
+                    context, "Registration failed. Error: ${e.message}", Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
     }
 }
