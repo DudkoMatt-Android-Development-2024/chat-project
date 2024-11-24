@@ -1,6 +1,7 @@
 package com.github.dudkomatt.androidcourse.chatproject.viewmodel
 
 import android.content.Context
+import android.util.Log
 import android.widget.Toast
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -44,10 +45,11 @@ class LoginViewModel(
                     )
                 ).body()?.string() ?: throw Exception("Token is null")
 
-                Toast.makeText(
-                    context, "Sign in SUCCESS. Response: $token", Toast.LENGTH_LONG
-                ).show()
+                SessionTokenManager.storeToken(context, token)
 
+                Toast.makeText(
+                    context, "Sign in SUCCESS. Token saved to DataStore", Toast.LENGTH_LONG
+                ).show()
             } catch (e: Exception) {
                 Toast.makeText(
                     context,

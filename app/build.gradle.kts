@@ -60,6 +60,7 @@ dependencies {
     implementation(libs.androidx.material.icons.extended)
     implementation(libs.koin.androidx.compose)
     implementation(libs.koin.androidx.compose.navigation)
+    implementation(libs.androidx.datastore.preferences)
 
     testImplementation(libs.junit)
 
