@@ -7,8 +7,7 @@ import androidx.compose.ui.tooling.preview.Preview
 
 @Composable
 fun ChatScreenHorizontal(
-    createNewChannel: () -> Unit,
-    createNewChat: () -> Unit,
+    username: String,
 ) {
     Row {
         Text("This is the horizontal screen")
@@ -21,7 +20,6 @@ fun ChatScreenHorizontal(
 @Preview(device = "spec:parent=pixel_5,orientation=landscape")
 fun ChatScreenHorizontalPreview() {
     ChatScreenHorizontal(
-        createNewChannel = {},
-        createNewChat = {}
+        username = "Username",
     )
 }

@@ -1,18 +1,18 @@
 package com.github.dudkomatt.androidcourse.chatproject.ui.screen.chat.vertical
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Campaign
 import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.ModeEditOutline
-import androidx.compose.material.icons.filled.Textsms
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -23,11 +23,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.tooling.preview.datasource.LoremIpsum
 import androidx.compose.ui.unit.dp
 import com.github.dudkomatt.androidcourse.chatproject.R
-import com.github.dudkomatt.androidcourse.chatproject.model.ChatEntryModel
-import com.github.dudkomatt.androidcourse.chatproject.ui.screen.component.ChatListEntry
+import com.github.dudkomatt.androidcourse.chatproject.ui.screen.component.ChatTitle
 import com.github.dudkomatt.androidcourse.chatproject.ui.screen.component.IconButtonWithCallback
 import com.github.dudkomatt.androidcourse.chatproject.ui.screen.component.ThumbProfileClickableImage
 import com.github.dudkomatt.androidcourse.chatproject.ui.screen.component.TopAppBar
@@ -35,11 +33,11 @@ import com.github.dudkomatt.androidcourse.chatproject.ui.screen.component.TopApp
 @Composable
 fun ChatListVertical(
     onLogoutClick: () -> Unit,
-    createNewChannel: () -> Unit,
-    createNewChat: () -> Unit,
+    onRefreshClick: () -> Unit,
+    onCreateNewChatClick: () -> Unit,
     onChatClick: (String) -> Unit,
-    chatEntries: List<ChatEntryModel> = emptyList(),  // TODO - Remove default
-    modifier: Modifier = Modifier
+    registeredUsersAndChannels: List<String>,
+    modifier: Modifier = Modifier,
 ) {
     Scaffold(
         modifier = modifier
@@ -48,19 +46,18 @@ fun ChatListVertical(
             onLogoutClick = onLogoutClick
         ) },
         floatingActionButton = { BottomFloatingActionButton(
-            createNewChat = createNewChat,
-            createNewChannel = createNewChannel
+            onCreateNewChatClick = onCreateNewChatClick,
+            onRefreshClick = onRefreshClick,
         ) }
     ) { innerPadding ->
         LazyColumn(
             modifier = Modifier.padding(innerPadding),
             verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
-            items(chatEntries, key = { it.from }) {
-                ChatListEntry(
-                    from = it.from,
-                    lastMessage = it.lastMessage,
-                    onChatClick = onChatClick
+            items(registeredUsersAndChannels, key = { it }) {
+                UserEntry(
+                    username = it,
+                    modifier = Modifier.clickable { onChatClick(it) },
                 )
             }
         }
@@ -103,8 +100,8 @@ fun ChatListTopBar(
 
 @Composable
 fun BottomFloatingActionButton(
-    createNewChannel: () -> Unit,
-    createNewChat: () -> Unit,
+    onCreateNewChatClick: () -> Unit,
+    onRefreshClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column (
@@ -112,17 +109,17 @@ fun BottomFloatingActionButton(
     ) {
         FloatingActionButton(
             modifier = modifier,
-            onClick = createNewChannel
+            onClick = onRefreshClick
         ) {
             Icon(
-                Icons.Default.Campaign,
-                contentDescription = stringResource(R.string.create_new_channel_floating_action_button_description)
+                Icons.Default.Refresh,
+                contentDescription = stringResource(R.string.refresh_floating_action_button_description)
             )
         }
 
         FloatingActionButton(
             modifier = modifier,
-            onClick = createNewChat
+            onClick = onCreateNewChatClick
         ) {
             Icon(
                 Icons.Default.Edit,
@@ -133,17 +130,36 @@ fun BottomFloatingActionButton(
 }
 
 @Composable
+fun UserEntry(
+    username: String,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(2.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        ThumbProfileClickableImage(
+            modifier = Modifier.padding(all = 2.dp),
+            onImageClick = {}
+        )
+        ChatTitle(
+            from = username
+        )
+    }
+}
+
+@Composable
 @Preview(showBackground = true)
 fun ChatListVerticalPreview() {
-    val loremIpsum = LoremIpsum(30)
-
     ChatListVertical(
         onLogoutClick = {},
-        createNewChannel = {},
-        createNewChat = {},
+        onRefreshClick = {},
+        onCreateNewChatClick = {},
         onChatClick = {},
-        chatEntries = (1..20).map {
-            ChatEntryModel("From $it", loremIpsum.values.joinToString())
-        }
+        registeredUsersAndChannels = (1..20).map {
+            "From $it"
+        },
     )
 }

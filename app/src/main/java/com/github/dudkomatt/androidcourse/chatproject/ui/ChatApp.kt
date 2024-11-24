@@ -33,11 +33,15 @@ fun ChatApp() {
                 LoginScreen()
             }
             else {
-                ChatScreen(
-                    onLogoutClick = rootViewModel::logOut,
-                    createNewChannel = {},
-                    createNewChat = {}
-                )
+                val username = uiState.username
+                if (username != null) {
+                    ChatScreen(
+                        username = username,
+                        onLogoutClick = rootViewModel::logOut,
+                    )
+                } else {
+                    LoginScreen()
+                }
             }
         }
     }

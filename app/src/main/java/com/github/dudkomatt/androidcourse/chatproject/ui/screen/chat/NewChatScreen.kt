@@ -1,13 +1,12 @@
 package com.github.dudkomatt.androidcourse.chatproject.ui.screen.chat
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -19,15 +18,20 @@ import com.github.dudkomatt.androidcourse.chatproject.R
 import com.github.dudkomatt.androidcourse.chatproject.ui.screen.component.ReturnBackTopBarButton
 import com.github.dudkomatt.androidcourse.chatproject.ui.screen.component.TopAppBar
 import com.github.dudkomatt.androidcourse.chatproject.ui.screen.component.TopBarText
-import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.Button
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import com.github.dudkomatt.androidcourse.chatproject.ui.screen.component.ChatTitle
 import com.github.dudkomatt.androidcourse.chatproject.ui.screen.component.ThumbProfileClickableImage
 
 @Composable
 fun NewChatScreen(
     onBackClick: () -> Unit,
-    onUserClick: (String) -> Unit,
-    registeredUsersAndChannels: List<String>,
+    onNewChatClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Scaffold(
@@ -39,17 +43,27 @@ fun NewChatScreen(
             )
         }
     ) { innerPadding ->
-        LazyColumn(
+
+        Column (
             modifier = Modifier.padding(innerPadding),
             verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
-            items(registeredUsersAndChannels, key = { it }) {
-                UserEntry(
-                    modifier = Modifier.clickable { onUserClick(it) },
-                    username = it
-                )
-            }
+
+            var chatName by rememberSaveable { mutableStateOf("") }
+
+            TextField(
+                value = chatName,
+                onValueChange = { chatName = it }
+            )
+
+            Button(
+                content = {
+                    Text("Create a new channel or text to a new person")
+                },
+                onClick = onNewChatClick
+            )
         }
+
     }
 }
 
@@ -92,7 +106,7 @@ fun NewChatTopBar(
                 onBackClick = onBackClick
             )
             TopBarText(
-                text = stringResource(R.string.new_chat_screen_title)
+                text = stringResource(R.string.new_channel_screen_title)
             )
         }
     }
@@ -103,7 +117,6 @@ fun NewChatTopBar(
 fun NewChatScreenPreview() {
     NewChatScreen(
         onBackClick = {},
-        onUserClick = {},
-        registeredUsersAndChannels = listOf("user1", "user2", "user3")
+        onNewChatClick = {}
     )
 }

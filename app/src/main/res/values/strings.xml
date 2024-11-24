@@ -16,4 +16,6 @@
     <string name="new_chat_screen_title">New Chat</string>
     <string name="loading_message">Loading…</string>
     <string name="log_out_button">Log out button</string>
+    <string name="refresh_floating_action_button_description">Refresh</string>
+    <string name="new_channel_screen_title">New Channel</string>
 </resources>

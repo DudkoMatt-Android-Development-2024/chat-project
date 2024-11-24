@@ -1,17 +1,42 @@
 package com.github.dudkomatt.androidcourse.chatproject.viewmodel
 
+import android.app.Application
+import android.widget.Toast
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.github.dudkomatt.androidcourse.chatproject.network.InfoApi
+import com.github.dudkomatt.androidcourse.chatproject.network.MessageApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 
 data class ChatUiState(
-    var selectedUsername: String? = null
+    var isNewChatScreen: Boolean = false,
+    var selectedUsername: String? = null,
+    var registeredUsers: List<String>? = emptyList(),
+    var channels: List<String>? = emptyList(),
 )
 
-class ChatViewModel : ViewModel() {
+class ChatViewModel(
+    private val application: Application,
+    private val infoApi: InfoApi,
+    private val messageApi: MessageApi,
+) : ViewModel() {
     private val _uiState = MutableStateFlow(ChatUiState())
     val uiState: StateFlow<ChatUiState> = _uiState.asStateFlow()
+
+    init {
+        refresh()
+    }
+
+    fun setIsNewChatScreen(isNewChatScreen: Boolean = true) {
+        _uiState.value = _uiState.value.copy(isNewChatScreen = isNewChatScreen)
+    }
+
+    fun unsetIsNewChatScreen() {
+        _uiState.value = _uiState.value.copy(isNewChatScreen = false)
+    }
 
     fun setSelectedUsername(username: String) {
         _uiState.value = _uiState.value.copy(selectedUsername = username)
@@ -19,5 +44,22 @@ class ChatViewModel : ViewModel() {
 
     fun unsetSelectedUsername() {
         _uiState.value = _uiState.value.copy(selectedUsername = null)
+    }
+
+    fun refresh() {
+        viewModelScope.launch {
+            try {
+                _uiState.value = _uiState.value.copy(registeredUsers = listOf(), channels = listOf())
+                val users = infoApi.getUsers()
+                val channels = infoApi.getChannels()
+                _uiState.value = _uiState.value.copy(registeredUsers = users, channels = channels)
+            } catch (e: Exception) {
+                Toast.makeText(
+                    application.applicationContext,
+                    "Registered users and channels fetch failed. Error: ${e.message}",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
     }
 }

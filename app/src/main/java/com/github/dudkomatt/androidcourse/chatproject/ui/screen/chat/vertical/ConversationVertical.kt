@@ -45,6 +45,7 @@ import kotlinx.datetime.LocalDateTime
 
 @Composable
 fun ConversationVertical(
+    selectedUsername: String,
     onBackClick: () -> Unit,
     onAttachImageClick: () -> Unit,
     onSendClick: () -> Unit,
@@ -61,6 +62,7 @@ fun ConversationVertical(
             .fillMaxSize(),
         topBar = {
             ConversationTopBar(
+                username = selectedUsername,
                 onBackClick = onBackClick
             )
         },
@@ -88,9 +90,9 @@ fun ConversationVertical(
 
 @Composable
 fun ConversationTopBar(
-    modifier: Modifier = Modifier,
-    username: String = "Username",  // TODO - Remove default
-    onBackClick: () -> Unit
+    username: String,
+    onBackClick: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     TopAppBar { barHeight ->
         Row(
@@ -260,7 +262,8 @@ fun ConversationVerticalPreview() {
             getOutgoingMessage(id = 22, anotherUser = anotherUser1),
         ),
         onSendClick = {},
-        loggedInUsername = CURRENT_USERNAME
+        loggedInUsername = CURRENT_USERNAME,
+        selectedUsername = "Selected username"
     )
 }
 

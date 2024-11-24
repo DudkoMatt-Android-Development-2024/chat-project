@@ -6,6 +6,7 @@ import com.github.dudkomatt.androidcourse.chatproject.data.UserSessionManager
 import com.github.dudkomatt.androidcourse.chatproject.viewmodel.ChatViewModel
 import com.github.dudkomatt.androidcourse.chatproject.viewmodel.RootViewModel
 import com.github.dudkomatt.androidcourse.chatproject.viewmodel.LoginViewModel
+import org.koin.android.ext.koin.androidApplication
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
 import org.koin.core.context.startKoin
