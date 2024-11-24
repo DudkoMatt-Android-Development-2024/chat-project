@@ -19,7 +19,8 @@ data class LoginUiState(
 )
 
 class LoginViewModel(
-    private val authApi: AuthApi
+    private val authApi: AuthApi,
+    private val sessionTokenManager: SessionTokenManager
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(LoginUiState())
     val uiState: StateFlow<LoginUiState> = _uiState.asStateFlow()
@@ -45,7 +46,7 @@ class LoginViewModel(
                     )
                 ).body()?.string() ?: throw Exception("Token is null")
 
-                SessionTokenManager.storeToken(context, token)
+                sessionTokenManager.storeToken(token)
 
                 Toast.makeText(
                     context, "Sign in SUCCESS. Token saved to DataStore", Toast.LENGTH_LONG
