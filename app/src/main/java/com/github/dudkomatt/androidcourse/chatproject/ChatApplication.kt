@@ -3,6 +3,7 @@ package com.github.dudkomatt.androidcourse.chatproject
 import android.app.Application
 import com.github.dudkomatt.androidcourse.chatproject.data.AppConfigs
 import com.github.dudkomatt.androidcourse.chatproject.data.SessionTokenManager
+import com.github.dudkomatt.androidcourse.chatproject.viewmodel.RootViewModel
 import com.github.dudkomatt.androidcourse.chatproject.viewmodel.LoginViewModel
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
@@ -22,6 +23,7 @@ class ChatApplication : Application() {
             single { AppConfigs.infoRetrofitApi }
             single { AppConfigs.messageRetrofitApi }
 
+            viewModelOf(::RootViewModel)
             viewModelOf(::LoginViewModel)
 //        viewModel { ChatViewModel() }
 //        viewModel { NewChatViewModel() }

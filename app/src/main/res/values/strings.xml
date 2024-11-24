@@ -14,4 +14,5 @@
     <string name="message">Enter message...</string>
     <string name="attach_iamge_button_content_description">Attach/detach image</string>
     <string name="new_chat_screen_title">New Chat</string>
+    <string name="loading_message">Loading…</string>
 </resources>

@@ -25,6 +25,12 @@ class LoginViewModel(
     private val _uiState = MutableStateFlow(LoginUiState())
     val uiState: StateFlow<LoginUiState> = _uiState.asStateFlow()
 
+    fun clearToken() {
+        viewModelScope.launch {
+            sessionTokenManager.removeToken()
+        }
+    }
+
     fun onUsernameChange(newUsername: String) {
         _uiState.value = _uiState.value.copy(username = newUsername)
     }
