@@ -38,15 +38,20 @@ class LoginViewModel(
     fun onSignIn(context: Context) {
         viewModelScope.launch {
             try {
-                val responseWithToken = authApi.loginPost(
+                val token: String? = authApi.loginPost(
                     LoginRequest(
                         _uiState.value.username,
                         _uiState.value.password
                     )
-                )
+                ).body()?.string()
+
+                if (token == null) {
+                    throw Exception("Token is null")
+                }
+
                 Toast.makeText(
                     context,
-                    "Sign in SUCCESS. Response: $responseWithToken",
+                    "Sign in SUCCESS. Response: $token",
                     Toast.LENGTH_LONG
                 )
                     .show()
