@@ -22,7 +22,7 @@ fun ChatListEntry(
     from: String = "From",  // TODO - Remove defaults
     lastMessage: String = "Last message",  // TODO - Remove defaults
     onImageClick: () -> Unit = {},  // TODO - Remove defaults
-    onChatClick: (String) -> Unit = {},  // TODO - Remove defaults
+    onChatClick: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Row(

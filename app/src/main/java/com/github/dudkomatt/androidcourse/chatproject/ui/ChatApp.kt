@@ -26,10 +26,10 @@ fun ChatApp() {
             val rootViewModel: RootViewModel = koinViewModel()
             val uiState by rootViewModel.uiState.collectAsState()
 
-            if (uiState.isLoggedIn == null) {
+            if (uiState.isLoading) {
                 LoadingScreen()
             }
-            else if (uiState.isLoggedIn != true) {
+            else if (!uiState.isLoggedIn()) {
                 LoginScreen()
             }
             else {

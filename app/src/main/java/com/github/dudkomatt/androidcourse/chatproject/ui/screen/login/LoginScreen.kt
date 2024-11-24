@@ -91,7 +91,7 @@ fun LoginScreen(
             content = { Text(stringResource(R.string.sign_in)) },
             onClick = {
                 loginViewModel.onSignIn(context) {
-                    rootViewModel.setLoggedIn(true)
+                    rootViewModel.retrieveUsernameAndToken()
                 }
             }
         )

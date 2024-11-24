@@ -4,7 +4,7 @@ import android.content.Context
 import android.widget.Toast
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.github.dudkomatt.androidcourse.chatproject.data.SessionTokenManager
+import com.github.dudkomatt.androidcourse.chatproject.data.UserSessionManager
 import com.github.dudkomatt.androidcourse.chatproject.model.request.LoginRequest
 import com.github.dudkomatt.androidcourse.chatproject.network.AuthApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,7 +20,7 @@ data class LoginUiState(
 
 class LoginViewModel(
     private val authApi: AuthApi,
-    private val sessionTokenManager: SessionTokenManager
+    private val userSessionManager: UserSessionManager
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(LoginUiState())
     val uiState: StateFlow<LoginUiState> = _uiState.asStateFlow()
@@ -46,7 +46,7 @@ class LoginViewModel(
                     )
                 ).body()?.string() ?: throw Exception("Token is null")
 
-                sessionTokenManager.storeToken(token)
+                userSessionManager.storeUsernameAndToken(username = _uiState.value.username, token = token)
 
                 Toast.makeText(
                     context, "Sign in SUCCESS. Token saved to DataStore", Toast.LENGTH_LONG

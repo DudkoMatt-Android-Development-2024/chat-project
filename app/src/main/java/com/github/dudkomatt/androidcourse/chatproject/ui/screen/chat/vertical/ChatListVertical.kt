@@ -37,6 +37,7 @@ fun ChatListVertical(
     onLogoutClick: () -> Unit,
     createNewChannel: () -> Unit,
     createNewChat: () -> Unit,
+    onChatClick: (String) -> Unit,
     chatEntries: List<ChatEntryModel> = emptyList(),  // TODO - Remove default
     modifier: Modifier = Modifier
 ) {
@@ -55,11 +56,11 @@ fun ChatListVertical(
             modifier = Modifier.padding(innerPadding),
             verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
-            // TODO
             items(chatEntries, key = { it.from }) {
                 ChatListEntry(
                     from = it.from,
                     lastMessage = it.lastMessage,
+                    onChatClick = onChatClick
                 )
             }
         }
@@ -140,6 +141,7 @@ fun ChatListVerticalPreview() {
         onLogoutClick = {},
         createNewChannel = {},
         createNewChat = {},
+        onChatClick = {},
         chatEntries = (1..20).map {
             ChatEntryModel("From $it", loremIpsum.values.joinToString())
         }
