@@ -6,6 +6,7 @@ import androidx.compose.ui.Modifier
 import com.github.dudkomatt.androidcourse.chatproject.viewmodel.ChatViewModel
 import org.koin.androidx.compose.koinViewModel
 import androidx.compose.runtime.getValue
+import com.github.dudkomatt.androidcourse.chatproject.ui.screen.chat.NewChatScreen
 
 @Composable
 fun ChatScreenVertical(
@@ -25,6 +26,12 @@ fun ChatScreenVertical(
             onSendClick = {},
             loggedInUsername = username,
             chatMessages = listOf()  // TODO - List messages
+        )
+    } else if (uiState.isNewChatScreen) {
+        NewChatScreen(
+            onBackClick = chatViewModel::unsetIsNewChatScreen,
+            onNewChatClick = {},
+            modifier = modifier
         )
     } else {
         val registeredUsersAndChannels = uiState.registeredUsers.orEmpty() + uiState.channels.orEmpty()
