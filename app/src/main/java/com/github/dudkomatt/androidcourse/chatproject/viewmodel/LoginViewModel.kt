@@ -1,10 +1,10 @@
 package com.github.dudkomatt.androidcourse.chatproject.viewmodel
 
 import android.content.Context
-import android.util.Log
 import android.widget.Toast
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.github.dudkomatt.androidcourse.chatproject.data.SessionTokenManager
 import com.github.dudkomatt.androidcourse.chatproject.model.request.LoginRequest
 import com.github.dudkomatt.androidcourse.chatproject.network.AuthApi
 import kotlinx.coroutines.flow.MutableStateFlow

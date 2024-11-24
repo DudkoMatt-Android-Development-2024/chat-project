@@ -1,3 +1,5 @@
+package com.github.dudkomatt.androidcourse.chatproject.data
+
 import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
