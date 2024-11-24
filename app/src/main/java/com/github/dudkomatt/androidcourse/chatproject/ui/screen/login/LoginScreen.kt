@@ -20,6 +20,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -30,16 +32,17 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.github.dudkomatt.androidcourse.chatproject.R
 import com.github.dudkomatt.androidcourse.chatproject.viewmodel.LoginViewModel
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun LoginScreen(
     modifier: Modifier = Modifier
 ) {
     val scrollState = rememberScrollState()
-    val loginViewModel: LoginViewModel = viewModel()
+    val loginViewModel: LoginViewModel = koinViewModel()
+    val uiState by loginViewModel.uiState.collectAsState()
 
     Column(
         modifier = modifier
@@ -63,15 +66,15 @@ fun LoginScreen(
         UsernameTextField(
             modifier = contentWidthModifier
                 .height(textFieldHeight),
-            login = loginViewModel.username,
+            login = uiState.username,
             onValueChange = loginViewModel::onUsernameChange
         )
         PasswordTextField(
             modifier = contentWidthModifier
                 .height(textFieldHeight),
-            password = loginViewModel.password,
+            password = uiState.password,
             onPasswordValueChange = loginViewModel::onPasswordChange,
-            isPasswordVisible = loginViewModel.isPasswordVisible,
+            isPasswordVisible = uiState.isPasswordVisible,
             onPasswordVisibilityToggle = loginViewModel::onPasswordVisibilityToggle
         )
 
