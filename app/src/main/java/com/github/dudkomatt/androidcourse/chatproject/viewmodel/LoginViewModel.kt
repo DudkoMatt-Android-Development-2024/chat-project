@@ -25,12 +25,6 @@ class LoginViewModel(
     private val _uiState = MutableStateFlow(LoginUiState())
     val uiState: StateFlow<LoginUiState> = _uiState.asStateFlow()
 
-    fun clearToken() {
-        viewModelScope.launch {
-            sessionTokenManager.removeToken()
-        }
-    }
-
     fun onUsernameChange(newUsername: String) {
         _uiState.value = _uiState.value.copy(username = newUsername)
     }
@@ -43,7 +37,7 @@ class LoginViewModel(
         _uiState.value = _uiState.value.copy(isPasswordVisible = !_uiState.value.isPasswordVisible)
     }
 
-    fun onSignIn(context: Context) {
+    fun onSignIn(context: Context, successCallback: () -> Unit) {
         viewModelScope.launch {
             try {
                 val token: String = authApi.loginPost(
@@ -57,6 +51,9 @@ class LoginViewModel(
                 Toast.makeText(
                     context, "Sign in SUCCESS. Token saved to DataStore", Toast.LENGTH_LONG
                 ).show()
+
+                successCallback()
+                clearUiState()
             } catch (e: Exception) {
                 Toast.makeText(
                     context,
@@ -83,5 +80,9 @@ class LoginViewModel(
                 ).show()
             }
         }
+    }
+
+    private fun clearUiState() {
+        _uiState.value = LoginUiState()
     }
 }

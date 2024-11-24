@@ -34,6 +34,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.github.dudkomatt.androidcourse.chatproject.R
 import com.github.dudkomatt.androidcourse.chatproject.viewmodel.LoginViewModel
+import com.github.dudkomatt.androidcourse.chatproject.viewmodel.RootViewModel
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
@@ -41,7 +42,9 @@ fun LoginScreen(
     modifier: Modifier = Modifier
 ) {
     val scrollState = rememberScrollState()
+    val rootViewModel: RootViewModel = koinViewModel()
     val loginViewModel: LoginViewModel = koinViewModel()
+
     val uiState by loginViewModel.uiState.collectAsState()
 
     Column(
@@ -86,7 +89,11 @@ fun LoginScreen(
                 containerColor = MaterialTheme.colorScheme.primary
             ),
             content = { Text(stringResource(R.string.sign_in)) },
-            onClick = { loginViewModel.onSignIn(context) }
+            onClick = {
+                loginViewModel.onSignIn(context) {
+                    rootViewModel.setLoggedIn(true)
+                }
+            }
         )
 
         Button(

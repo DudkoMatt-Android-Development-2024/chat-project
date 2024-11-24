@@ -34,6 +34,7 @@ fun ChatApp() {
             }
             else {
                 ChatScreen(
+                    onLogoutClick = rootViewModel::logOut,
                     createNewChannel = {},
                     createNewChat = {}
                 )

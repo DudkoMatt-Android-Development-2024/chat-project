@@ -13,8 +13,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.AttachFile
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -27,8 +25,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -41,6 +37,7 @@ import com.github.dudkomatt.androidcourse.chatproject.ui.screen.chat.vertical.Pr
 import com.github.dudkomatt.androidcourse.chatproject.ui.screen.chat.vertical.PreviewData.getIncomingMessage
 import com.github.dudkomatt.androidcourse.chatproject.ui.screen.chat.vertical.PreviewData.getIncomingMessageWithImage
 import com.github.dudkomatt.androidcourse.chatproject.ui.screen.chat.vertical.PreviewData.getOutgoingMessage
+import com.github.dudkomatt.androidcourse.chatproject.ui.screen.component.IconButtonWithCallback
 import com.github.dudkomatt.androidcourse.chatproject.ui.screen.component.ReturnBackTopBarButton
 import com.github.dudkomatt.androidcourse.chatproject.ui.screen.component.TopBarText
 import kotlinx.datetime.LocalDateTime
@@ -227,28 +224,6 @@ fun SendMessageBottomBarButton(
         enabled = enabled,
         modifier = modifier
     )
-}
-
-@Composable
-fun IconButtonWithCallback(
-    onImageClick: () -> Unit,
-    imageVector: ImageVector,
-    contentDescription: String?,
-    enabled: Boolean,
-    tint: Color = MaterialTheme.colorScheme.onSurface,
-    modifier: Modifier = Modifier
-) {
-    IconButton(
-        modifier = modifier,
-        onClick = onImageClick,
-        enabled = enabled
-    ) {
-        Icon(
-            imageVector = imageVector,
-            contentDescription = contentDescription,
-            tint = tint
-        )
-    }
 }
 
 @Composable

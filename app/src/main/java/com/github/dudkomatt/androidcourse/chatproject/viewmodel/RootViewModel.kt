@@ -28,4 +28,15 @@ class RootViewModel(
                 _uiState.value.copy(isLoggedIn = sessionTokenManager.getToken() != null)
         }
     }
+
+    fun setLoggedIn(isLoggedIn: Boolean = true) {
+        _uiState.value = _uiState.value.copy(isLoggedIn = isLoggedIn)
+    }
+
+    fun logOut() {
+        viewModelScope.launch {
+            sessionTokenManager.removeToken()
+            setLoggedIn(false)
+        }
+    }
 }

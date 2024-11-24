@@ -9,6 +9,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Campaign
+import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.ModeEditOutline
 import androidx.compose.material.icons.filled.Textsms
@@ -27,11 +28,13 @@ import androidx.compose.ui.unit.dp
 import com.github.dudkomatt.androidcourse.chatproject.R
 import com.github.dudkomatt.androidcourse.chatproject.model.ChatEntryModel
 import com.github.dudkomatt.androidcourse.chatproject.ui.screen.component.ChatListEntry
+import com.github.dudkomatt.androidcourse.chatproject.ui.screen.component.IconButtonWithCallback
 import com.github.dudkomatt.androidcourse.chatproject.ui.screen.component.ThumbProfileClickableImage
 import com.github.dudkomatt.androidcourse.chatproject.ui.screen.component.TopAppBar
 
 @Composable
 fun ChatListVertical(
+    onLogoutClick: () -> Unit,
     createNewChannel: () -> Unit,
     createNewChat: () -> Unit,
     chatEntries: List<ChatEntryModel> = emptyList(),  // TODO - Remove default
@@ -40,7 +43,9 @@ fun ChatListVertical(
     Scaffold(
         modifier = modifier
             .fillMaxSize(),
-        topBar = { ChatListTopBar() },
+        topBar = { ChatListTopBar(
+            onLogoutClick = onLogoutClick
+        ) },
         floatingActionButton = { BottomFloatingActionButton(
             createNewChat = createNewChat,
             createNewChannel = createNewChannel
@@ -63,6 +68,7 @@ fun ChatListVertical(
 
 @Composable
 fun ChatListTopBar(
+    onLogoutClick: () -> Unit,
     onProfileImageClick: () -> Unit = {}  // TODO - Remove default
 ) {
     TopAppBar {
@@ -75,10 +81,21 @@ fun ChatListTopBar(
                 text = stringResource(R.string.chats_screen_title),
                 style = MaterialTheme.typography.titleLarge
             )
-            ThumbProfileClickableImage(
-                modifier = Modifier.padding(all = 2.dp),
-                onImageClick = onProfileImageClick
-            )
+            Row (
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                IconButtonWithCallback(
+                    onImageClick = onLogoutClick,
+                    imageVector = Icons.Default.Cancel,
+                    contentDescription = stringResource(R.string.log_out_button),
+                    tint = MaterialTheme.colorScheme.onSurface,
+                    enabled = true
+                )
+                ThumbProfileClickableImage(
+                    modifier = Modifier.padding(all = 2.dp),
+                    onImageClick = onProfileImageClick
+                )
+            }
         }
     }
 }
@@ -120,6 +137,7 @@ fun ChatListVerticalPreview() {
     val loremIpsum = LoremIpsum(30)
 
     ChatListVertical(
+        onLogoutClick = {},
         createNewChannel = {},
         createNewChat = {},
         chatEntries = (1..20).map {

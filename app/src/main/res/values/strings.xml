@@ -15,4 +15,5 @@
     <string name="attach_iamge_button_content_description">Attach/detach image</string>
     <string name="new_chat_screen_title">New Chat</string>
     <string name="loading_message">Loading…</string>
+    <string name="log_out_button">Log out button</string>
 </resources>

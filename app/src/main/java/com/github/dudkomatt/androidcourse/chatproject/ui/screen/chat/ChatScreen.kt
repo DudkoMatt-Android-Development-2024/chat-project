@@ -9,6 +9,7 @@ import com.github.dudkomatt.androidcourse.chatproject.ui.screen.chat.vertical.Ch
 
 @Composable
 fun ChatScreen(
+    onLogoutClick: () -> Unit,
     createNewChannel: () -> Unit,
     createNewChat: () -> Unit,
 ) {
@@ -24,6 +25,7 @@ fun ChatScreen(
 
         else -> {
             ChatScreenVertical(
+                onLogoutClick = onLogoutClick,
                 createNewChannel = createNewChannel,
                 createNewChat = createNewChat,
             )
@@ -35,6 +37,7 @@ fun ChatScreen(
 @Preview(showBackground = true)
 fun ChatScreenPortraitPreview() {
     ChatScreen(
+        onLogoutClick = {},
         createNewChannel = {},
         createNewChat = {},
     )
@@ -44,6 +47,7 @@ fun ChatScreenPortraitPreview() {
 @Preview(showBackground = true, device = "spec:parent=pixel_5,orientation=landscape")
 fun ChatScreenLandscapePreview() {
     ChatScreen(
+        onLogoutClick = {},
         createNewChannel = {},
         createNewChat = {},
     )

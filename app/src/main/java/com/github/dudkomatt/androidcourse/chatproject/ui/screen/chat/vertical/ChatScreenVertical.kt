@@ -8,12 +8,14 @@ import com.github.dudkomatt.androidcourse.chatproject.model.ChatEntryModel
 
 @Composable
 fun ChatScreenVertical(
+    onLogoutClick: () -> Unit,
     createNewChannel: () -> Unit,
     createNewChat: () -> Unit,
     chatEntries: List<ChatEntryModel> = emptyList(),  // TODO - Remove default
     modifier: Modifier = Modifier
 ) {
     ChatListVertical(
+        onLogoutClick = onLogoutClick,
         createNewChannel = createNewChannel,
         createNewChat = createNewChat,
         chatEntries = chatEntries,
@@ -31,6 +33,7 @@ fun ChatScreenVerticalPreview() {
     val loremIpsum = LoremIpsum(30)
 
     ChatScreenVertical(
+        onLogoutClick = {},
         createNewChannel = {},
         createNewChat = {},
         chatEntries = (1..20).map {
