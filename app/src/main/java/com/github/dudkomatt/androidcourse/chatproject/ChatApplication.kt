@@ -1,6 +1,7 @@
 package com.github.dudkomatt.androidcourse.chatproject
 
 import android.app.Application
+import com.github.dudkomatt.androidcourse.chatproject.data.MessagePagingRepository
 import com.github.dudkomatt.androidcourse.chatproject.data.RetrofitConfigs
 import com.github.dudkomatt.androidcourse.chatproject.data.UserSessionRepository
 import com.github.dudkomatt.androidcourse.chatproject.viewmodel.ChatViewModel
@@ -27,13 +28,16 @@ class ChatApplication : Application() {
             single { RetrofitConfigs.messageRetrofitApi }
 
             // Repositories
-
-            // TODO
+            single {
+                MessagePagingRepository(
+                    userSessionRepository = get(),
+                    retrofitMessageApi = get()
+                )
+            }
 
             viewModelOf(::RootViewModel)
             viewModelOf(::LoginViewModel)
             viewModelOf(::ChatViewModel)
-//        viewModel { NewChatViewModel() }
         }
 
         startKoin {

@@ -7,16 +7,29 @@ import com.github.dudkomatt.androidcourse.chatproject.network.MessageApi
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
+
 
 object RetrofitConfigs {
     const val X_AUTH_TOKEN_HEADER = "X-Auth-Token"
 
     private const val BASE_URL = "https://faerytea.name:8008"
 
+    private fun getOkHttpClient(): OkHttpClient {
+        val loggingInterceptor = HttpLoggingInterceptor()
+        loggingInterceptor.level = HttpLoggingInterceptor.Level.BASIC
+
+        return OkHttpClient.Builder()
+            .addInterceptor(loggingInterceptor)
+            .build()
+    }
+
     private val retrofit: Retrofit = Retrofit.Builder()
         .addConverterFactory(Json.asConverterFactory("application/json".toMediaType()))
         .baseUrl(BASE_URL)
+        .client(getOkHttpClient())
         .build()
 
     val authRetrofitApi: AuthApi by lazy {
