@@ -2,11 +2,10 @@ package com.github.dudkomatt.androidcourse.chatproject
 
 import android.app.Application
 import com.github.dudkomatt.androidcourse.chatproject.data.AppConfigs
-import com.github.dudkomatt.androidcourse.chatproject.data.UserSessionManager
+import com.github.dudkomatt.androidcourse.chatproject.data.UserSessionRepository
 import com.github.dudkomatt.androidcourse.chatproject.viewmodel.ChatViewModel
 import com.github.dudkomatt.androidcourse.chatproject.viewmodel.RootViewModel
 import com.github.dudkomatt.androidcourse.chatproject.viewmodel.LoginViewModel
-import org.koin.android.ext.koin.androidApplication
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
 import org.koin.core.context.startKoin
@@ -19,7 +18,7 @@ class ChatApplication : Application() {
         super.onCreate()
 
         val viewModelModule = module {
-            single { UserSessionManager(androidContext()) }
+            single { UserSessionRepository(androidContext()) }
             single { AppConfigs.authRetrofitApi }
             single { AppConfigs.imageRetrofitApi }
             single { AppConfigs.infoRetrofitApi }

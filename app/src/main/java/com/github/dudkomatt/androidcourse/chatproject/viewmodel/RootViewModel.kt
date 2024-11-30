@@ -2,7 +2,7 @@ package com.github.dudkomatt.androidcourse.chatproject.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.github.dudkomatt.androidcourse.chatproject.data.UserSessionManager
+import com.github.dudkomatt.androidcourse.chatproject.data.UserSessionRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -19,7 +19,7 @@ data class RootUIState(
 }
 
 class RootViewModel(
-    private val userSessionManager: UserSessionManager
+    private val userSessionRepository: UserSessionRepository
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(RootUIState())
     val uiState: StateFlow<RootUIState> = _uiState.asStateFlow()
@@ -32,8 +32,8 @@ class RootViewModel(
         viewModelScope.launch {
             _uiState.value =
                 _uiState.value.copy(
-                    username = userSessionManager.getUsername(),
-                    token = userSessionManager.getToken(),
+                    username = userSessionRepository.getUsername(),
+                    token = userSessionRepository.getToken(),
                     isLoading = false
                 )
         }
@@ -41,7 +41,7 @@ class RootViewModel(
 
     fun logOut() {
         viewModelScope.launch {
-            userSessionManager.removeUserInfo()
+            userSessionRepository.removeUserInfo()
             retrieveUsernameAndToken()
         }
     }
