@@ -4,8 +4,8 @@ import android.app.Application
 import android.widget.Toast
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.github.dudkomatt.androidcourse.chatproject.data.MessageRepository
 import com.github.dudkomatt.androidcourse.chatproject.network.InfoApi
-import com.github.dudkomatt.androidcourse.chatproject.network.MessageApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -25,7 +25,7 @@ data class ChatUiState(
 class ChatViewModel(
     private val application: Application,
     private val infoApi: InfoApi,
-    private val messageApi: MessageApi,
+    private val messageRepository: MessageRepository,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(ChatUiState())
     val uiState: StateFlow<ChatUiState> = _uiState.asStateFlow()
@@ -44,6 +44,10 @@ class ChatViewModel(
 
     fun setSelectedUsername(username: String) {
         _uiState.value = _uiState.value.copy(selectedUiSubScreen = SelectedUiSubScreen.Conversation(username))
+    }
+
+    fun getMessagesFromChat(username: String) {
+
     }
 
     fun refresh() {

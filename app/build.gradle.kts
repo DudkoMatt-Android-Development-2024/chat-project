@@ -61,6 +61,8 @@ dependencies {
     implementation(libs.koin.androidx.compose)
     implementation(libs.koin.androidx.compose.navigation)
     implementation(libs.androidx.datastore.preferences)
+    implementation(libs.androidx.paging.common)
+    implementation(libs.androidx.paging.compose)
 
     testImplementation(libs.junit)
 

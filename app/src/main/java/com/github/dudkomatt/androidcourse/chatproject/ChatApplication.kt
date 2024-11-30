@@ -1,7 +1,7 @@
 package com.github.dudkomatt.androidcourse.chatproject
 
 import android.app.Application
-import com.github.dudkomatt.androidcourse.chatproject.data.AppConfigs
+import com.github.dudkomatt.androidcourse.chatproject.data.RetrofitConfigs
 import com.github.dudkomatt.androidcourse.chatproject.data.UserSessionRepository
 import com.github.dudkomatt.androidcourse.chatproject.viewmodel.ChatViewModel
 import com.github.dudkomatt.androidcourse.chatproject.viewmodel.RootViewModel
@@ -19,10 +19,16 @@ class ChatApplication : Application() {
 
         val viewModelModule = module {
             single { UserSessionRepository(androidContext()) }
-            single { AppConfigs.authRetrofitApi }
-            single { AppConfigs.imageRetrofitApi }
-            single { AppConfigs.infoRetrofitApi }
-            single { AppConfigs.messageRetrofitApi }
+
+            // Retrofit
+            single { RetrofitConfigs.authRetrofitApi }
+            single { RetrofitConfigs.imageRetrofitApi }
+            single { RetrofitConfigs.infoRetrofitApi }
+            single { RetrofitConfigs.messageRetrofitApi }
+
+            // Repositories
+
+            // TODO
 
             viewModelOf(::RootViewModel)
             viewModelOf(::LoginViewModel)

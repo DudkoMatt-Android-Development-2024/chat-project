@@ -9,14 +9,14 @@ import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
 import retrofit2.Retrofit
 
-object AppConfigs {
+object RetrofitConfigs {
+    const val X_AUTH_TOKEN_HEADER = "X-Auth-Token"
+
     private const val BASE_URL = "https://faerytea.name:8008"
-//    private val okHttpClient: OkHttpClient  // TODO
 
     private val retrofit: Retrofit = Retrofit.Builder()
         .addConverterFactory(Json.asConverterFactory("application/json".toMediaType()))
         .baseUrl(BASE_URL)
-//        .client(okHttpClient)  // TODO
         .build()
 
     val authRetrofitApi: AuthApi by lazy {
