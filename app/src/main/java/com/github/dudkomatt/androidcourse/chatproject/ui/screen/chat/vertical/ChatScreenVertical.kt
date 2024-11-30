@@ -40,6 +40,7 @@ fun ChatScreenVertical(
             val registeredUsersAndChannels = uiState.registeredUsers.orEmpty() + uiState.channels.orEmpty()
 
             ChatListVertical(
+                selectedUsername = null,
                 onLogoutClick = onLogoutClick,
                 onRefreshClick = chatViewModel::refresh,
                 onCreateNewChatClick = chatViewModel::setIsNewChatScreen,

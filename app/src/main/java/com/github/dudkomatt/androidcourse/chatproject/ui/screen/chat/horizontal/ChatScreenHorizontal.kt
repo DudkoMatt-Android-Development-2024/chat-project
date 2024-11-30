@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -33,9 +34,11 @@ fun ChatScreenHorizontal(
 
     Row {
         val uiState by chatViewModel.uiState.collectAsState()
+        val subScreen = uiState.selectedUiSubScreen
 
         val registeredUsersAndChannels = uiState.registeredUsers.orEmpty() + uiState.channels.orEmpty()
         ChatListVertical(
+            selectedUsername = if (subScreen is SelectedUiSubScreen.Conversation) subScreen.selectedUsername else null,
             onLogoutClick = onLogoutClick,
             onRefreshClick = chatViewModel::refresh,
             onCreateNewChatClick = chatViewModel::setIsNewChatScreen,
@@ -46,7 +49,7 @@ fun ChatScreenHorizontal(
                 .fillMaxWidth(.35f)
         )
 
-        when (val subScreen = uiState.selectedUiSubScreen) {
+        when (subScreen) {
             is SelectedUiSubScreen.Conversation -> {
                 ConversationVertical(
                     selectedUsername = subScreen.selectedUsername,
@@ -71,16 +74,20 @@ fun ChatScreenHorizontal(
 
 @Composable
 fun BackgroundPlaceholder() {
-    Row(
-        modifier = Modifier.fillMaxSize(),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceAround
+    Surface(
+        tonalElevation = 1.dp,
     ) {
-        Text(
-            text = stringResource(R.string.open_or_start_a_new_chat_to_see_messages),
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onBackground,
-        )
+        Row(
+            modifier = Modifier.fillMaxSize(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceAround
+        ) {
+            Text(
+                text = stringResource(R.string.open_or_start_a_new_chat_to_see_messages),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onBackground,
+            )
+        }
     }
 }
 

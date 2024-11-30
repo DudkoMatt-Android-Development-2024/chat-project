@@ -81,27 +81,6 @@ fun NewChatScreen(
 }
 
 @Composable
-fun UserEntry(
-    username: String,
-    modifier: Modifier = Modifier
-) {
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(2.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        ThumbProfileClickableImage(
-            modifier = Modifier.padding(all = 2.dp),
-            onImageClick = {}
-        )
-        ChatTitle(
-            from = username
-        )
-    }
-}
-
-@Composable
 fun NewChatTopBar(
     onBackClick: () -> Unit,
     modifier: Modifier = Modifier

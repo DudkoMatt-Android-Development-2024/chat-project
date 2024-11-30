@@ -1,10 +1,10 @@
 package com.github.dudkomatt.androidcourse.chatproject.ui.screen.chat.vertical
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -32,6 +32,7 @@ import com.github.dudkomatt.androidcourse.chatproject.ui.screen.component.TopApp
 
 @Composable
 fun ChatListVertical(
+    selectedUsername: String?,
     onLogoutClick: () -> Unit,
     onRefreshClick: () -> Unit,
     onCreateNewChatClick: () -> Unit,
@@ -56,7 +57,8 @@ fun ChatListVertical(
             items(registeredUsersAndChannels, key = { it }) {
                 UserEntry(
                     username = it,
-                    modifier = Modifier.clickable { onChatClick(it) },
+                    isSelected = selectedUsername == it,
+                    modifier = Modifier.clickable { onChatClick(it) }
                 )
             }
         }
@@ -131,11 +133,13 @@ fun BottomFloatingActionButton(
 @Composable
 fun UserEntry(
     username: String,
+    isSelected: Boolean,
     modifier: Modifier = Modifier
 ) {
     Row(
         modifier = modifier
             .fillMaxWidth()
+            .background(color = if (isSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.background)
             .padding(2.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -160,5 +164,6 @@ fun ChatListVerticalPreview() {
         registeredUsersAndChannels = (1..20).map {
             "From $it"
         },
+        selectedUsername = "From 1",
     )
 }

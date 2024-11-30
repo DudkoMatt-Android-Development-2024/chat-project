@@ -108,8 +108,7 @@ fun ConversationTopBar(
             )
             Row(
                 modifier = Modifier
-                    .fillMaxSize()
-                    .clickable { onBackClick() },
+                    .fillMaxSize(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 ThumbProfileImage()
