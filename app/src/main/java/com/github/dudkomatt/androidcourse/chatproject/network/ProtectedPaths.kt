@@ -1,10 +1,10 @@
 package com.github.dudkomatt.androidcourse.chatproject.network
 
 object ProtectedPaths {
-    val methodToPathPrefix: Set<Pair<String, String>> = setOf(
-        HttpRequestType.GET.name to "/inbox/",
-        HttpRequestType.POST.name to "/1ch",
-        HttpRequestType.POST.name to "/messages",
+    val methodToPathPrefix: Map<String, Set<String>> = mapOf(
+        "/inbox/" to setOf(HttpRequestType.GET.name),
+        "/1ch" to setOf(HttpRequestType.POST.name),
+        "/messages" to setOf(HttpRequestType.POST.name),
     )
 }
 
