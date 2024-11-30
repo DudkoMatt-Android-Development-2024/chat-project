@@ -40,8 +40,7 @@ fun ChatListVertical(
     modifier: Modifier = Modifier,
 ) {
     Scaffold(
-        modifier = modifier
-            .fillMaxSize(),
+        modifier = modifier,
         topBar = { ChatListTopBar(
             onLogoutClick = onLogoutClick
         ) },

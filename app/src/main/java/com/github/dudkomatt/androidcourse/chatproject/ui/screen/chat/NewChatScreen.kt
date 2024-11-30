@@ -1,5 +1,6 @@
 package com.github.dudkomatt.androidcourse.chatproject.ui.screen.chat
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -7,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -34,6 +36,10 @@ fun NewChatScreen(
     onNewChatClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    BackHandler {
+        onBackClick()
+    }
+
     Scaffold(
         modifier = modifier
             .fillMaxSize(),
@@ -45,18 +51,25 @@ fun NewChatScreen(
     ) { innerPadding ->
 
         Column (
-            modifier = Modifier.padding(innerPadding),
-            verticalArrangement = Arrangement.spacedBy(4.dp)
+            modifier = Modifier
+                .padding(innerPadding)
+                .fillMaxWidth(),
+            horizontalAlignment = Alignment.Start
         ) {
-
             var chatName by rememberSaveable { mutableStateOf("") }
 
             TextField(
+                modifier = Modifier
+                    .padding(8.dp)
+                    .widthIn(min = 0.dp, max = 500.dp)
+                    .fillMaxWidth(),
                 value = chatName,
-                onValueChange = { chatName = it }
+                onValueChange = { chatName = it },
+                label = { Text(stringResource(R.string.channel_name_or_username)) }
             )
 
             Button(
+                modifier = Modifier.padding(8.dp),
                 content = {
                     Text("Create a new channel or text to a new person")
                 },

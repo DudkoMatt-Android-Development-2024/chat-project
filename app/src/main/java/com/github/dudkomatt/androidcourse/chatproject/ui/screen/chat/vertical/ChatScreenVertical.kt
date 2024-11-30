@@ -7,6 +7,7 @@ import com.github.dudkomatt.androidcourse.chatproject.viewmodel.ChatViewModel
 import org.koin.androidx.compose.koinViewModel
 import androidx.compose.runtime.getValue
 import com.github.dudkomatt.androidcourse.chatproject.ui.screen.chat.NewChatScreen
+import com.github.dudkomatt.androidcourse.chatproject.viewmodel.SelectedUiSubScreen
 
 @Composable
 fun ChatScreenVertical(
@@ -17,33 +18,35 @@ fun ChatScreenVertical(
     val chatViewModel: ChatViewModel = koinViewModel()
     val uiState by chatViewModel.uiState.collectAsState()
 
-    val selectedUsername = uiState.selectedUsername
-    if (selectedUsername != null) {
-        ConversationVertical(
-            selectedUsername = selectedUsername,
-            onBackClick = chatViewModel::unsetSelectedUsername,
-            onAttachImageClick = {},  // TODO - Attach images
-            onSendClick = {},
-            loggedInUsername = username,
-            chatMessages = listOf()  // TODO - List messages
-        )
-    } else if (uiState.isNewChatScreen) {
-        NewChatScreen(
-            onBackClick = chatViewModel::unsetIsNewChatScreen,
-            onNewChatClick = {},
-            modifier = modifier
-        )
-    } else {
-        val registeredUsersAndChannels = uiState.registeredUsers.orEmpty() + uiState.channels.orEmpty()
+    when (val subScreen = uiState.selectedUiSubScreen) {
+        is SelectedUiSubScreen.Conversation -> {
+            ConversationVertical(
+                selectedUsername = subScreen.selectedUsername,
+                onBackClick = chatViewModel::unsetSubScreen,
+                onAttachImageClick = {},  // TODO - Attach images
+                onSendClick = {},
+                loggedInUsername = username,
+                chatMessages = listOf()  // TODO - List messages
+            )
+        }
+        SelectedUiSubScreen.NewChat -> {
+            NewChatScreen(
+                onBackClick = chatViewModel::unsetSubScreen,
+                onNewChatClick = {},
+                modifier = modifier
+            )
+        }
+        null -> {
+            val registeredUsersAndChannels = uiState.registeredUsers.orEmpty() + uiState.channels.orEmpty()
 
-        ChatListVertical(
-            onLogoutClick = onLogoutClick,
-            onRefreshClick = chatViewModel::refresh,
-            onCreateNewChatClick = chatViewModel::setIsNewChatScreen,
-            registeredUsersAndChannels = registeredUsersAndChannels,
-            onChatClick = chatViewModel::setSelectedUsername,
-            modifier = modifier
-        )
-
+            ChatListVertical(
+                onLogoutClick = onLogoutClick,
+                onRefreshClick = chatViewModel::refresh,
+                onCreateNewChatClick = chatViewModel::setIsNewChatScreen,
+                registeredUsersAndChannels = registeredUsersAndChannels,
+                onChatClick = chatViewModel::setSelectedUsername,
+                modifier = modifier
+            )
+        }
     }
 }

@@ -11,9 +11,13 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
+sealed interface SelectedUiSubScreen {
+    data class Conversation(var selectedUsername: String) : SelectedUiSubScreen
+    data object NewChat : SelectedUiSubScreen
+}
+
 data class ChatUiState(
-    var isNewChatScreen: Boolean = false,
-    var selectedUsername: String? = null,
+    var selectedUiSubScreen: SelectedUiSubScreen? = null,
     var registeredUsers: List<String>? = emptyList(),
     var channels: List<String>? = emptyList(),
 )
@@ -31,25 +35,22 @@ class ChatViewModel(
     }
 
     fun setIsNewChatScreen(isNewChatScreen: Boolean = true) {
-        _uiState.value = _uiState.value.copy(isNewChatScreen = isNewChatScreen)
+        _uiState.value = _uiState.value.copy(selectedUiSubScreen = SelectedUiSubScreen.NewChat)
     }
 
-    fun unsetIsNewChatScreen() {
-        _uiState.value = _uiState.value.copy(isNewChatScreen = false)
+    fun unsetSubScreen() {
+        _uiState.value = _uiState.value.copy(selectedUiSubScreen = null)
     }
 
     fun setSelectedUsername(username: String) {
-        _uiState.value = _uiState.value.copy(selectedUsername = username)
-    }
-
-    fun unsetSelectedUsername() {
-        _uiState.value = _uiState.value.copy(selectedUsername = null)
+        _uiState.value = _uiState.value.copy(selectedUiSubScreen = SelectedUiSubScreen.Conversation(username))
     }
 
     fun refresh() {
         viewModelScope.launch {
             try {
-                _uiState.value = _uiState.value.copy(registeredUsers = listOf(), channels = listOf())
+                _uiState.value =
+                    _uiState.value.copy(registeredUsers = listOf(), channels = listOf())
                 val users = infoApi.getUsers()
                 val channels = infoApi.getChannels()
                 _uiState.value = _uiState.value.copy(registeredUsers = users, channels = channels)

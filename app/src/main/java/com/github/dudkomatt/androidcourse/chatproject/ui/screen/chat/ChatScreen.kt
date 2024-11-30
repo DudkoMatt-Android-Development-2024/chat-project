@@ -1,7 +1,10 @@
 package com.github.dudkomatt.androidcourse.chatproject.ui.screen.chat
 
 import android.content.res.Configuration
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.tooling.preview.Preview
 import com.github.dudkomatt.androidcourse.chatproject.ui.screen.chat.horizontal.ChatScreenHorizontal
@@ -18,10 +21,12 @@ fun ChatScreen(
         Configuration.ORIENTATION_LANDSCAPE -> {
             ChatScreenHorizontal(
                 username = username,
+                onLogoutClick = onLogoutClick,
             )
         }
         else -> {
             ChatScreenVertical(
+                modifier = Modifier.fillMaxSize(),
                 username = username,
                 onLogoutClick = onLogoutClick,
             )
