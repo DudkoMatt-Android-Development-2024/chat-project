@@ -34,7 +34,7 @@ class ChatViewModel(
         refresh()
     }
 
-    fun setIsNewChatScreen(isNewChatScreen: Boolean = true) {
+    fun setIsNewChatScreen() {
         _uiState.value = _uiState.value.copy(selectedUiSubScreen = SelectedUiSubScreen.NewChat)
     }
 
