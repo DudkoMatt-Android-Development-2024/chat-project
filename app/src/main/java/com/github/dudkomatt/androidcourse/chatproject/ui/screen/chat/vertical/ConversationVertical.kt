@@ -173,8 +173,10 @@ fun ConversationBottomBar(
             verticalAlignment = Alignment.Bottom
         ) {
             var prompt by rememberSaveable { mutableStateOf("") }
+            val padding = 4.dp
 
             AttachImageButton(
+                modifier = Modifier.padding(padding),
                 onAttachImageClick = onAttachImageClick
             )
 
@@ -189,6 +191,7 @@ fun ConversationBottomBar(
             )
 
             SendMessageBottomBarButton(
+                modifier = Modifier.padding(padding),
                 onSendClick = onSendClick,
                 enabled = prompt.isNotBlank()
             )
