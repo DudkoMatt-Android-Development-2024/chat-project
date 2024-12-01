@@ -13,6 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.github.dudkomatt.androidcourse.chatproject.ui.ChatApp
 import com.github.dudkomatt.androidcourse.chatproject.ui.theme.ChatProjectTheme
+import org.koin.compose.KoinContext
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -20,7 +21,9 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             ChatProjectTheme {
-                ChatApp()
+                KoinContext {
+                    ChatApp()
+                }
             }
         }
     }

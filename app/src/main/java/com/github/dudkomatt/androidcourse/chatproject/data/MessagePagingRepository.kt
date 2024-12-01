@@ -20,20 +20,12 @@ data class QueryParameters(
 
 data class MessagePagingQueryParameters(
     val parameters: QueryParameters,
-    val source: MessageSource
+    val source: MessageSource?
 ) {
-    fun next(pageSize: Int): MessagePagingQueryParameters {
-        return getNext(pageSize = pageSize, isNext = true)
-    }
-
-    fun prev(pageSize: Int): MessagePagingQueryParameters {
-        return getNext(pageSize = pageSize, isNext = false)
-    }
-
-    private fun getNext(pageSize: Int, isNext: Boolean): MessagePagingQueryParameters {
+    fun next(lastKnownId: Int): MessagePagingQueryParameters {
         return MessagePagingQueryParameters(
             parameters = QueryParameters(
-                lastKnownId = parameters.lastKnownId + pageSize * (if (parameters.reverse) -1 else 1) * (if (isNext) -1 else 1),
+                lastKnownId = lastKnownId,
                 reverse = parameters.reverse,
             ),
             source = source
@@ -60,8 +52,7 @@ class MessagePagingRepository(
 
         return state.anchorPosition?.let { anchorPosition ->
             val anchorPage = state.closestPageToPosition(anchorPosition)
-            anchorPage?.prevKey?.next(state.config.pageSize)
-                ?: anchorPage?.nextKey?.prev(state.config.pageSize)
+            anchorPage?.prevKey ?: anchorPage?.nextKey
         }
     }
 
@@ -72,27 +63,33 @@ class MessagePagingRepository(
             val pageParameters = params.key
                 ?: throw IllegalStateException("Initial page parameter source not defined")  // TODO - How to set source?
 
-            val source: MessageSource = pageParameters.source
-            val page: QueryParameters = pageParameters.parameters
+            if (pageParameters.source == null) {
+                return LoadResult.Page(
+                    data = listOf(),
+                    prevKey = null,
+                    nextKey = null
+                )
+            }
 
-            val response = when (source) {
+            val response = when (val source: MessageSource = pageParameters.source) {
                 is MessageSource.ChannelOrUser -> getFromChannel(
                     limit = params.loadSize,
                     channelName = source.channelOrUser,
-                    page = page
+                    page = pageParameters.parameters
                 )
 
                 is MessageSource.Inbox -> getUserInbox(
                     limit = params.loadSize,
                     username = source.username,
-                    page = page
+                    page = pageParameters.parameters
                 )
             }
 
             return LoadResult.Page(
                 data = response,
                 prevKey = null, // Only paging forward
-                nextKey = if (response.isEmpty()) null else pageParameters.next(response.size)
+                nextKey = if (response.isEmpty() || response.size < params.loadSize) null
+                else pageParameters.next(response.maxOf { it.id })
             )
         } catch (e: Exception) {
             return LoadResult.Error(e)

@@ -1,6 +1,5 @@
 package com.github.dudkomatt.androidcourse.chatproject.model
 
-import kotlinx.datetime.LocalDateTime
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -10,7 +9,7 @@ data class MessageModel(
     val from: String,
     val to: String,
     val data: TextMessageInner,
-    val time: LocalDateTime,
+    val time: Long,
 ) {
     @Serializable
     data class TextMessageInner(

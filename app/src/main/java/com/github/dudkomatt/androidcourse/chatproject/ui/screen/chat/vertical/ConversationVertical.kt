@@ -1,8 +1,9 @@
 package com.github.dudkomatt.androidcourse.chatproject.ui.screen.chat.vertical
 
+import android.util.Log
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -32,7 +33,9 @@ import com.github.dudkomatt.androidcourse.chatproject.R
 import com.github.dudkomatt.androidcourse.chatproject.model.MessageModel
 import com.github.dudkomatt.androidcourse.chatproject.ui.screen.component.ThumbProfileImage
 import com.github.dudkomatt.androidcourse.chatproject.ui.screen.component.TopAppBar
-import androidx.compose.foundation.lazy.items
+import androidx.paging.LoadState
+import androidx.paging.PagingData
+import androidx.paging.compose.collectAsLazyPagingItems
 import com.github.dudkomatt.androidcourse.chatproject.ui.screen.chat.vertical.PreviewData.CURRENT_USERNAME
 import com.github.dudkomatt.androidcourse.chatproject.ui.screen.chat.vertical.PreviewData.getIncomingMessage
 import com.github.dudkomatt.androidcourse.chatproject.ui.screen.chat.vertical.PreviewData.getIncomingMessageWithImage
@@ -40,7 +43,11 @@ import com.github.dudkomatt.androidcourse.chatproject.ui.screen.chat.vertical.Pr
 import com.github.dudkomatt.androidcourse.chatproject.ui.screen.component.IconButtonWithCallback
 import com.github.dudkomatt.androidcourse.chatproject.ui.screen.component.ReturnBackTopBarButton
 import com.github.dudkomatt.androidcourse.chatproject.ui.screen.component.TopBarText
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toInstant
 
 
 @Composable
@@ -50,7 +57,7 @@ fun ConversationVertical(
     onAttachImageClick: () -> Unit,
     onSendClick: () -> Unit,
     loggedInUsername: String,
-    chatMessages: List<MessageModel>,
+    chatMessagesFlow: Flow<PagingData<MessageModel>>,
     modifier: Modifier = Modifier,
 ) {
     BackHandler {
@@ -73,18 +80,48 @@ fun ConversationVertical(
             )
         }
     ) { innerPadding ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding),
-        ) {
-            items(chatMessages, key = { it.id }) {
-                MessageEntry(
-                    loggedInUsername = loggedInUsername,
-                    message = it
-                )
+        val lazyPagingItems = chatMessagesFlow.collectAsLazyPagingItems()
+
+        Box(modifier = Modifier.padding(innerPadding)) {
+
+            val state = lazyPagingItems.loadState.refresh
+            when (state) {
+                is LoadState.Loading -> {
+                    Text("Loading")  // TODO
+                }
+
+                is LoadState.Error -> {
+                    Log.d("TAG", "ConversationVertical: ${state.error.message}")  // TODO
+                    Log.d("TAG", "ConversationVertical: ${state.error.stackTraceToString()}")  // TODO
+                    Text("Error ${state.error}")  // TODO
+                }
+
+                is LoadState.NotLoading -> {
+//                    Text("Loaded")  // TODO
+
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(innerPadding),
+                    ) {
+                        items(count = lazyPagingItems.itemCount) { index ->
+                            val item = lazyPagingItems[index]
+                            if (item != null) {
+                                MessageEntry(
+                                    loggedInUsername = loggedInUsername,
+                                    message = item
+                                )
+                            } else {
+                                Text("That's it")  // TODO
+                            }
+                        }
+                    }
+                }
+
+                else -> Text("Something else")  // TODO
             }
         }
+
     }
 }
 
@@ -236,33 +273,35 @@ fun ConversationVerticalPreview() {
     val anotherUser1 = "anotherUser1"
     val anotherUser2 = "anotherUser2"
 
+    val messages = listOf(
+        getIncomingMessage(id = 1, anotherUser = anotherUser1),
+        getOutgoingMessage(id = 2, anotherUser = anotherUser1),
+        getIncomingMessageWithImage(id = 3, anotherUser = anotherUser2),
+        getOutgoingMessage(id = 4, anotherUser = anotherUser1),
+        getOutgoingMessage(id = 5, anotherUser = anotherUser1),
+        getOutgoingMessage(id = 6, anotherUser = anotherUser1),
+        getOutgoingMessage(id = 7, anotherUser = anotherUser1),
+        getOutgoingMessage(id = 8, anotherUser = anotherUser1),
+        getIncomingMessage(id = 9, anotherUser = anotherUser1),
+        getIncomingMessage(id = 10, anotherUser = anotherUser1),
+        getOutgoingMessage(id = 11, anotherUser = anotherUser1),
+        getOutgoingMessage(id = 12, anotherUser = anotherUser1),
+        getIncomingMessage(id = 13, anotherUser = anotherUser1),
+        getIncomingMessage(id = 14, anotherUser = anotherUser1),
+        getIncomingMessage(id = 15, anotherUser = anotherUser1),
+        getOutgoingMessage(id = 16, anotherUser = anotherUser1),
+        getOutgoingMessage(id = 17, anotherUser = anotherUser1),
+        getOutgoingMessage(id = 18, anotherUser = anotherUser1),
+        getIncomingMessage(id = 19, anotherUser = anotherUser1),
+        getIncomingMessage(id = 20, anotherUser = anotherUser1),
+        getIncomingMessage(id = 21, anotherUser = anotherUser1),
+        getOutgoingMessage(id = 22, anotherUser = anotherUser1),
+    )
+
     ConversationVertical(
         onBackClick = {},
         onAttachImageClick = {},
-        chatMessages = listOf(
-            getIncomingMessage(id = 1, anotherUser = anotherUser1),
-            getOutgoingMessage(id = 2, anotherUser = anotherUser1),
-            getIncomingMessageWithImage(id = 3, anotherUser = anotherUser2),
-            getOutgoingMessage(id = 4, anotherUser = anotherUser1),
-            getOutgoingMessage(id = 5, anotherUser = anotherUser1),
-            getOutgoingMessage(id = 6, anotherUser = anotherUser1),
-            getOutgoingMessage(id = 7, anotherUser = anotherUser1),
-            getOutgoingMessage(id = 8, anotherUser = anotherUser1),
-            getIncomingMessage(id = 9, anotherUser = anotherUser1),
-            getIncomingMessage(id = 10, anotherUser = anotherUser1),
-            getOutgoingMessage(id = 11, anotherUser = anotherUser1),
-            getOutgoingMessage(id = 12, anotherUser = anotherUser1),
-            getIncomingMessage(id = 13, anotherUser = anotherUser1),
-            getIncomingMessage(id = 14, anotherUser = anotherUser1),
-            getIncomingMessage(id = 15, anotherUser = anotherUser1),
-            getOutgoingMessage(id = 16, anotherUser = anotherUser1),
-            getOutgoingMessage(id = 17, anotherUser = anotherUser1),
-            getOutgoingMessage(id = 18, anotherUser = anotherUser1),
-            getIncomingMessage(id = 19, anotherUser = anotherUser1),
-            getIncomingMessage(id = 20, anotherUser = anotherUser1),
-            getIncomingMessage(id = 21, anotherUser = anotherUser1),
-            getOutgoingMessage(id = 22, anotherUser = anotherUser1),
-        ),
+        chatMessagesFlow = MutableStateFlow(PagingData.from(messages)),
         onSendClick = {},
         loggedInUsername = CURRENT_USERNAME,
         selectedUsername = "Selected username"
@@ -294,6 +333,8 @@ object PreviewData {
                 text = MessageModel.TextPayload("Incoming message")
             ),
             LocalDateTime(2024, 1, 1, 1, 1)
+                .toInstant(TimeZone.of("Europe/Moscow"))
+                .epochSeconds
         )
     }
 
@@ -310,6 +351,8 @@ object PreviewData {
                 text = MessageModel.TextPayload("Outgoing message")
             ),
             LocalDateTime(2024, 1, 1, 1, 2)
+                .toInstant(TimeZone.of("Europe/Moscow"))
+                .epochSeconds
         )
     }
 
@@ -327,6 +370,8 @@ object PreviewData {
                 image = MessageModel.ImagePayload("tool/tmp/scala-spiral.png")
             ),
             LocalDateTime(2024, 1, 1, 1, 2)
+                .toInstant(TimeZone.of("Europe/Moscow"))
+                .epochSeconds
         )
     }
 }

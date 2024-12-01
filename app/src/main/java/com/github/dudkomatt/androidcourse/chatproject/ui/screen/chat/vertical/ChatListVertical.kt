@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Cancel
@@ -33,6 +34,7 @@ import com.github.dudkomatt.androidcourse.chatproject.ui.screen.component.TopApp
 @Composable
 fun ChatListVertical(
     selectedUsername: String?,
+    lazyListState: LazyListState,
     onLogoutClick: () -> Unit,
     onRefreshClick: () -> Unit,
     onCreateNewChatClick: () -> Unit,
@@ -52,7 +54,8 @@ fun ChatListVertical(
     ) { innerPadding ->
         LazyColumn(
             modifier = Modifier.padding(innerPadding),
-            verticalArrangement = Arrangement.spacedBy(4.dp)
+            verticalArrangement = Arrangement.spacedBy(4.dp),
+            state = lazyListState
         ) {
             items(registeredUsersAndChannels, key = { it }) {
                 UserEntry(
@@ -165,5 +168,6 @@ fun ChatListVerticalPreview() {
             "From $it"
         },
         selectedUsername = "From 1",
+        lazyListState = LazyListState()
     )
 }

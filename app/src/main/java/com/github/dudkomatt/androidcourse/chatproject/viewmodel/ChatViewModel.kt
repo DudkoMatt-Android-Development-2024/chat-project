@@ -2,6 +2,7 @@ package com.github.dudkomatt.androidcourse.chatproject.viewmodel
 
 import android.app.Application
 import android.widget.Toast
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.Pager
@@ -42,20 +43,20 @@ class ChatViewModel(
     private val _uiState = MutableStateFlow(ChatUiState())
     val uiState: StateFlow<ChatUiState> = _uiState.asStateFlow()
 
-    @OptIn(ExperimentalCoroutinesApi::class)
-    val pagingDataFlow: Flow<PagingData<MessageModel>> = uiState.flatMapLatest { state ->
-        val selectedUiSubScreen = state.selectedUiSubScreen
+    val chatListScrollState = LazyListState()
 
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val pagingDataFlow: Flow<PagingData<MessageModel>> = _uiState.flatMapLatest { state ->
+        val selectedUiSubScreen = state.selectedUiSubScreen
         Pager(
-            config = PagingConfig(20),
+            config = PagingConfig(pageSize = 20),
             initialKey = MessagePagingQueryParameters(
                 QueryParameters(),
                 when (selectedUiSubScreen) {
                     is SelectedUiSubScreen.Conversation -> MessageSource.ChannelOrUser(
                         selectedUiSubScreen.selectedUsername
                     )
-
-                    else -> throw NotImplementedError("This type is not implemented")
+                    else -> null
                 }
             ),
             pagingSourceFactory = { messagePagingRepository }

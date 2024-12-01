@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -46,7 +47,8 @@ fun ChatScreenHorizontal(
             onChatClick = chatViewModel::setSelectedUsername,
             modifier = modifier
                 .widthIn(min = 0.dp, max = 1000.dp)
-                .fillMaxWidth(.35f)
+                .fillMaxWidth(.35f),
+            lazyListState = chatViewModel.chatListScrollState
         )
 
         when (subScreen) {
@@ -57,7 +59,7 @@ fun ChatScreenHorizontal(
                     onAttachImageClick = {},  // TODO - Attach images
                     onSendClick = {},
                     loggedInUsername = username,
-                    chatMessages = listOf()  // TODO - List messages
+                    chatMessagesFlow = chatViewModel.pagingDataFlow
                 )
             }
             SelectedUiSubScreen.NewChat -> {
