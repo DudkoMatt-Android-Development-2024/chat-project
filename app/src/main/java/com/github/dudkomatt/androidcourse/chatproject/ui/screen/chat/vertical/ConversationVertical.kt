@@ -5,6 +5,7 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -35,6 +36,7 @@ import com.github.dudkomatt.androidcourse.chatproject.ui.screen.component.ThumbP
 import com.github.dudkomatt.androidcourse.chatproject.ui.screen.component.TopAppBar
 import androidx.paging.LoadState
 import androidx.paging.PagingData
+import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.github.dudkomatt.androidcourse.chatproject.model.room.MessageEntity
 import com.github.dudkomatt.androidcourse.chatproject.ui.screen.chat.vertical.PreviewData.CURRENT_USERNAME
@@ -44,6 +46,7 @@ import com.github.dudkomatt.androidcourse.chatproject.ui.screen.chat.vertical.Pr
 import com.github.dudkomatt.androidcourse.chatproject.ui.screen.component.IconButtonWithCallback
 import com.github.dudkomatt.androidcourse.chatproject.ui.screen.component.ReturnBackTopBarButton
 import com.github.dudkomatt.androidcourse.chatproject.ui.screen.component.TopBarText
+import com.github.dudkomatt.androidcourse.chatproject.ui.screen.loading.LoadingScreen
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.datetime.LocalDateTime
@@ -85,44 +88,50 @@ fun ConversationVertical(
 
         Box(modifier = Modifier.padding(innerPadding)) {
 
-            val state = lazyPagingItems.loadState.refresh
-            when (state) {
+            when (val state = lazyPagingItems.loadState.refresh) {
                 is LoadState.Loading -> {
-                    Text("Loading")  // TODO
+                    LoadingScreen()
                 }
 
                 is LoadState.Error -> {
                     Log.d("TAG", "ConversationVertical: ${state.error.message}")  // TODO
                     Log.d("TAG", "ConversationVertical: ${state.error.stackTraceToString()}")  // TODO
                     Text("Error ${state.error}")  // TODO
+
+                    MessageLazyColumn(innerPadding, lazyPagingItems, loggedInUsername)
                 }
 
                 is LoadState.NotLoading -> {
-//                    Text("Loaded")  // TODO
-
-                    LazyColumn(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(innerPadding),
-                    ) {
-                        items(count = lazyPagingItems.itemCount) { index ->
-                            val item = lazyPagingItems[index]
-                            if (item != null) {
-                                MessageEntry(
-                                    loggedInUsername = loggedInUsername,
-                                    message = item
-                                )
-                            } else {
-                                Text("That's it")  // TODO
-                            }
-                        }
-                    }
+                    MessageLazyColumn(innerPadding, lazyPagingItems, loggedInUsername)
                 }
 
                 else -> Text("Something else")  // TODO
             }
         }
 
+    }
+}
+
+@Composable
+private fun MessageLazyColumn(
+    innerPadding: PaddingValues,
+    lazyPagingItems: LazyPagingItems<MessageEntity>,
+    loggedInUsername: String
+) {
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(innerPadding),
+    ) {
+        items(count = lazyPagingItems.itemCount) { index ->
+            val item = lazyPagingItems[index]
+            if (item != null) {
+                MessageEntry(
+                    loggedInUsername = loggedInUsername,
+                    message = item
+                )
+            }
+        }
     }
 }
 
