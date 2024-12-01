@@ -8,38 +8,31 @@ import com.github.dudkomatt.androidcourse.chatproject.model.request.TextMessageR
 import com.github.dudkomatt.androidcourse.chatproject.network.MessageApi
 import okhttp3.RequestBody
 
+class QueryParameters(
+    val lastKnownId: Int = 0,
+    val reverse: Boolean = false
+) {
+    fun next(lastKnownId: Int): QueryParameters {
+        return QueryParameters(
+            lastKnownId = lastKnownId,
+            reverse = reverse,
+        )
+    }
+}
+
 sealed interface MessageSource {
     data class Inbox(val username: String) : MessageSource
     data class ChannelOrUser(val channelOrUser: String) : MessageSource
 }
 
-data class QueryParameters(
-    val lastKnownId: Int = 0,
-    val reverse: Boolean = false,
-)
-
-data class MessagePagingQueryParameters(
-    val parameters: QueryParameters,
-    val source: MessageSource?
-) {
-    fun next(lastKnownId: Int): MessagePagingQueryParameters {
-        return MessagePagingQueryParameters(
-            parameters = QueryParameters(
-                lastKnownId = lastKnownId,
-                reverse = parameters.reverse,
-            ),
-            source = source
-        )
-    }
-}
-
-// TODO - Здесь кэширование и пагинация
+// TODO - Здесь кэширование?
 class MessagePagingRepository(
     private val userSessionRepository: UserSessionRepository,
-    private val retrofitMessageApi: MessageApi
-) : PagingSource<MessagePagingQueryParameters, MessageModel>() {
+    private val retrofitMessageApi: MessageApi,
+    private val messageSource: MessageSource?
+) : PagingSource<QueryParameters, MessageModel>() {
 
-    override fun getRefreshKey(state: PagingState<MessagePagingQueryParameters, MessageModel>): MessagePagingQueryParameters? {
+    override fun getRefreshKey(state: PagingState<QueryParameters, MessageModel>): QueryParameters? {
         // https://developer.android.com/topic/libraries/architecture/paging/v3-paged-data
 
         // Try to find the page key of the closest page to anchorPosition from
@@ -50,20 +43,20 @@ class MessagePagingRepository(
         //  * both prevKey and nextKey are null -> anchorPage is the
         //    initial page, so return null.
 
+        // Note: can calculate only forward, can rely only on prevKey
+
         return state.anchorPosition?.let { anchorPosition ->
-            val anchorPage = state.closestPageToPosition(anchorPosition)
-            anchorPage?.prevKey ?: anchorPage?.nextKey
+            state.closestPageToPosition(anchorPosition)?.prevKey
         }
     }
 
-    override suspend fun load(params: LoadParams<MessagePagingQueryParameters>): LoadResult<MessagePagingQueryParameters, MessageModel> {
+    override suspend fun load(params: LoadParams<QueryParameters>): LoadResult<QueryParameters, MessageModel> {
         // https://developer.android.com/topic/libraries/architecture/paging/v3-paged-data
 
         try {
-            val pageParameters = params.key
-                ?: throw IllegalStateException("Initial page parameter source not defined")  // TODO - How to set source?
+            val pageParameters = params.key ?: QueryParameters()
 
-            if (pageParameters.source == null) {
+            if (messageSource == null) {
                 return LoadResult.Page(
                     data = listOf(),
                     prevKey = null,
@@ -71,17 +64,17 @@ class MessagePagingRepository(
                 )
             }
 
-            val response = when (val source: MessageSource = pageParameters.source) {
+            val response = when (messageSource) {
                 is MessageSource.ChannelOrUser -> getFromChannel(
                     limit = params.loadSize,
-                    channelName = source.channelOrUser,
-                    page = pageParameters.parameters
+                    channelName = messageSource.channelOrUser,
+                    page = pageParameters
                 )
 
                 is MessageSource.Inbox -> getUserInbox(
                     limit = params.loadSize,
-                    username = source.username,
-                    page = pageParameters.parameters
+                    username = messageSource.username,
+                    page = pageParameters
                 )
             }
 

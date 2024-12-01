@@ -28,13 +28,6 @@ class ChatApplication : Application() {
             single { RetrofitConfigs.messageRetrofitApi }
 
             // Repositories
-            single {
-                MessagePagingRepository(
-                    userSessionRepository = get(),
-                    retrofitMessageApi = get()
-                )
-            }
-
             viewModelOf(::RootViewModel)
             viewModelOf(::LoginViewModel)
             viewModelOf(::ChatViewModel)

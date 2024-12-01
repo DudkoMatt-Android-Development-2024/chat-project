@@ -9,12 +9,13 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
-import com.github.dudkomatt.androidcourse.chatproject.data.MessagePagingQueryParameters
 import com.github.dudkomatt.androidcourse.chatproject.data.MessagePagingRepository
 import com.github.dudkomatt.androidcourse.chatproject.data.MessageSource
 import com.github.dudkomatt.androidcourse.chatproject.data.QueryParameters
+import com.github.dudkomatt.androidcourse.chatproject.data.UserSessionRepository
 import com.github.dudkomatt.androidcourse.chatproject.model.MessageModel
 import com.github.dudkomatt.androidcourse.chatproject.network.InfoApi
+import com.github.dudkomatt.androidcourse.chatproject.network.MessageApi
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -37,7 +38,8 @@ data class ChatUiState(
 class ChatViewModel(
     private val application: Application,
     private val infoApi: InfoApi,
-    private val messagePagingRepository: MessagePagingRepository,
+    private val userSessionRepository: UserSessionRepository,
+    private val retrofitMessageApi: MessageApi,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ChatUiState())
@@ -46,20 +48,23 @@ class ChatViewModel(
     val chatListScrollState = LazyListState()
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    val pagingDataFlow: Flow<PagingData<MessageModel>> = _uiState.flatMapLatest { state ->
+    val pagingDataFlow: Flow<PagingData<MessageModel>> = uiState.flatMapLatest { state ->
         val selectedUiSubScreen = state.selectedUiSubScreen
         Pager(
             config = PagingConfig(pageSize = 20),
-            initialKey = MessagePagingQueryParameters(
-                QueryParameters(),
-                when (selectedUiSubScreen) {
-                    is SelectedUiSubScreen.Conversation -> MessageSource.ChannelOrUser(
-                        selectedUiSubScreen.selectedUsername
-                    )
-                    else -> null
-                }
-            ),
-            pagingSourceFactory = { messagePagingRepository }
+            initialKey = QueryParameters(),
+            pagingSourceFactory = {
+                MessagePagingRepository(
+                    userSessionRepository = userSessionRepository,
+                    retrofitMessageApi = retrofitMessageApi,
+                    messageSource = when (selectedUiSubScreen) {
+                        is SelectedUiSubScreen.Conversation -> MessageSource.ChannelOrUser(
+                            selectedUiSubScreen.selectedUsername
+                        )
+                        else -> null
+                    }
+                )
+            }
         ).flow.cachedIn(viewModelScope)
     }
 
