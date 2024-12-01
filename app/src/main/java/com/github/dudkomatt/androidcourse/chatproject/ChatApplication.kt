@@ -4,7 +4,6 @@ import android.app.Application
 import com.github.dudkomatt.androidcourse.chatproject.data.RetrofitConfigs
 import com.github.dudkomatt.androidcourse.chatproject.data.RoomConfigs
 import com.github.dudkomatt.androidcourse.chatproject.data.UserSessionRepository
-import com.github.dudkomatt.androidcourse.chatproject.data.paging.MessagePagingRoomRepository
 import com.github.dudkomatt.androidcourse.chatproject.viewmodel.ChatViewModel
 import com.github.dudkomatt.androidcourse.chatproject.viewmodel.RootViewModel
 import com.github.dudkomatt.androidcourse.chatproject.viewmodel.LoginViewModel

@@ -1,6 +1,7 @@
 package com.github.dudkomatt.androidcourse.chatproject.viewmodel
 
 import android.app.Application
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.lifecycle.ViewModel
@@ -13,7 +14,6 @@ import androidx.paging.cachedIn
 import com.github.dudkomatt.androidcourse.chatproject.data.paging.NetworkMessagePagingRepository
 import com.github.dudkomatt.androidcourse.chatproject.data.paging.MessageSource
 import com.github.dudkomatt.androidcourse.chatproject.data.UserSessionRepository
-import com.github.dudkomatt.androidcourse.chatproject.data.paging.MessagePagingRoomRepository
 import com.github.dudkomatt.androidcourse.chatproject.data.paging.MessageRemoteMediator
 import com.github.dudkomatt.androidcourse.chatproject.model.room.ChatEntity
 import com.github.dudkomatt.androidcourse.chatproject.model.room.MessageEntity
@@ -37,7 +37,7 @@ sealed interface SelectedUiSubScreen {
 data class ChatUiState(
     var isOffline: Boolean = false,
     var selectedUiSubScreen: SelectedUiSubScreen? = null,
-    var registeredUsersAndChannels: List<String>? = emptyList(),
+    var registeredUsersAndChannels: List<String>? = null,
 )
 
 class ChatViewModel(
@@ -66,13 +66,14 @@ class ChatViewModel(
         }
 
         val networkMessagePagingRepository = NetworkMessagePagingRepository(
-            messageSource = messageSource,
             retrofitMessageApi = retrofitMessageApi,
             userSessionRepository = userSessionRepository
         )
 
         Pager(
-            config = PagingConfig(pageSize = 20),
+            config = PagingConfig(
+                pageSize = 20,
+            ),
             initialKey = 0,
             remoteMediator = MessageRemoteMediator(
                 messageSource = messageSource,
@@ -80,16 +81,21 @@ class ChatViewModel(
                 networkMessagePagingRepository = networkMessagePagingRepository
             ),
             pagingSourceFactory = {
-                MessagePagingRoomRepository(
-                    messageSource = messageSource,
-                    messageDao = database.messageDao()
-                )
+                database.messageDao().getBy(messageSource.channelOrUser)
             }
         ).flow.cachedIn(viewModelScope)
     }
 
     init {
         refresh()
+    }
+
+    fun refreshConversation() {
+        // TODO - Not working
+        viewModelScope.launch {
+            Log.d("TAG", "refreshConversation: invalidation")
+            _uiState.emit(_uiState.value.copy())
+        }
     }
 
     fun setIsNewChatScreen() {

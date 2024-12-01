@@ -22,6 +22,7 @@ fun ChatScreenVertical(
         is SelectedUiSubScreen.Conversation -> {
             ConversationVertical(
                 selectedUsername = subScreen.selectedUsername,
+                onChatRefreshClick = chatViewModel::refreshConversation,
                 onBackClick = chatViewModel::unsetSubScreen,
                 onAttachImageClick = {},  // TODO - Attach images
                 onSendClick = {},

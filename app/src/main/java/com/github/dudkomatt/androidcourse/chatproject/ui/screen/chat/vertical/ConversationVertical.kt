@@ -15,6 +15,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.AttachFile
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -23,7 +26,6 @@ import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -32,7 +34,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.github.dudkomatt.androidcourse.chatproject.R
-import com.github.dudkomatt.androidcourse.chatproject.model.retrofit.response.MessageModel
 import com.github.dudkomatt.androidcourse.chatproject.ui.screen.component.ThumbProfileImage
 import com.github.dudkomatt.androidcourse.chatproject.ui.screen.component.TopAppBar
 import androidx.paging.LoadState
@@ -59,6 +60,7 @@ import kotlinx.datetime.toInstant
 @Composable
 fun ConversationVertical(
     selectedUsername: String,
+    onChatRefreshClick: () -> Unit,
     onBackClick: () -> Unit,
     onAttachImageClick: () -> Unit,
     onSendClick: () -> Unit,
@@ -78,6 +80,7 @@ fun ConversationVertical(
         topBar = {
             ConversationTopBar(
                 username = selectedUsername,
+                onChatRefreshClick = onChatRefreshClick,
                 onBackClick = onBackClick,
                 isOffline = lazyPagingItems.loadState.refresh is LoadState.Error
             )
@@ -145,6 +148,7 @@ private fun MessageLazyColumn(
 @Composable
 fun ConversationTopBar(
     username: String,
+    onChatRefreshClick: () -> Unit,
     onBackClick: () -> Unit,
     isOffline: Boolean,
     modifier: Modifier = Modifier
@@ -170,18 +174,34 @@ fun ConversationTopBar(
                 TopBarText(
                     text = username
                 )
-                if (isOffline) {
-                    Box(
-                        modifier = Modifier.fillMaxWidth(),
-                        contentAlignment = Alignment.CenterEnd
-                    ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    if (isOffline) {
                         OfflineIcon(
                             modifier = Modifier.padding(end = barHeight / 4)
                         )
                     }
+                    RefreshButton(onRefreshClick = onChatRefreshClick)
                 }
             }
         }
+    }
+}
+
+@Composable
+fun RefreshButton(modifier: Modifier = Modifier, onRefreshClick: () -> Unit) {
+    IconButton(
+        modifier = modifier,
+        onClick = onRefreshClick
+    ) {
+        Icon(
+            imageVector = Icons.Default.Refresh,
+            contentDescription = stringResource(R.string.refresh_button),
+            tint = MaterialTheme.colorScheme.onSurface
+        )
     }
 }
 
@@ -327,6 +347,7 @@ fun ConversationVerticalPreview() {
     )
 
     ConversationVertical(
+        onChatRefreshClick = {},
         onBackClick = {},
         onAttachImageClick = {},
         chatMessagesFlow = MutableStateFlow(PagingData.from(messages)),
