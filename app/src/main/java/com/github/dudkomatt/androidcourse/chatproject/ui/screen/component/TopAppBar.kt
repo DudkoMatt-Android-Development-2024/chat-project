@@ -18,7 +18,7 @@ fun TopAppBar(
         modifier = modifier
             .fillMaxWidth()
             .height(topBarHeight),
-        tonalElevation = 16.dp
+        tonalElevation = 72.dp
     ) {
         contents(topBarHeight)
     }
