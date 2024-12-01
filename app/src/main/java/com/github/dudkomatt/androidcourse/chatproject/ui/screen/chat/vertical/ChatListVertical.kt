@@ -11,8 +11,10 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -28,23 +30,27 @@ import androidx.compose.ui.unit.dp
 import com.github.dudkomatt.androidcourse.chatproject.R
 import com.github.dudkomatt.androidcourse.chatproject.ui.screen.component.ChatTitle
 import com.github.dudkomatt.androidcourse.chatproject.ui.screen.component.IconButtonWithCallback
+import com.github.dudkomatt.androidcourse.chatproject.ui.screen.component.OfflineIcon
 import com.github.dudkomatt.androidcourse.chatproject.ui.screen.component.ThumbProfileClickableImage
 import com.github.dudkomatt.androidcourse.chatproject.ui.screen.component.TopAppBar
+import com.github.dudkomatt.androidcourse.chatproject.ui.screen.loading.LoadingScreen
 
 @Composable
 fun ChatListVertical(
+    isOffline: Boolean,
     selectedUsername: String?,
     lazyListState: LazyListState,
     onLogoutClick: () -> Unit,
     onRefreshClick: () -> Unit,
     onCreateNewChatClick: () -> Unit,
     onChatClick: (String) -> Unit,
-    registeredUsersAndChannels: List<String>,
+    registeredUsersAndChannels: List<String>?,
     modifier: Modifier = Modifier,
 ) {
     Scaffold(
         modifier = modifier,
         topBar = { ChatListTopBar(
+            isOffline = isOffline,
             onLogoutClick = onLogoutClick
         ) },
         floatingActionButton = { BottomFloatingActionButton(
@@ -52,17 +58,21 @@ fun ChatListVertical(
             onRefreshClick = onRefreshClick,
         ) }
     ) { innerPadding ->
-        LazyColumn(
-            modifier = Modifier.padding(innerPadding),
-            verticalArrangement = Arrangement.spacedBy(4.dp),
-            state = lazyListState
-        ) {
-            items(registeredUsersAndChannels, key = { it }) {
-                UserEntry(
-                    username = it,
-                    isSelected = selectedUsername == it,
-                    modifier = Modifier.clickable { onChatClick(it) }
-                )
+        if (registeredUsersAndChannels == null) {
+            LoadingScreen()
+        } else {
+            LazyColumn(
+                modifier = Modifier.padding(innerPadding),
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+                state = lazyListState
+            ) {
+                items(registeredUsersAndChannels, key = { it }) {
+                    UserEntry(
+                        username = it,
+                        isSelected = selectedUsername == it,
+                        modifier = Modifier.clickable { onChatClick(it) }
+                    )
+                }
             }
         }
     }
@@ -70,6 +80,7 @@ fun ChatListVertical(
 
 @Composable
 fun ChatListTopBar(
+    isOffline: Boolean,
     onLogoutClick: () -> Unit,
     onProfileImageClick: () -> Unit = {}  // TODO - Remove default
 ) {
@@ -85,10 +96,16 @@ fun ChatListTopBar(
             )
             Row (
                 verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(4.dp)
             ) {
+                if (isOffline) {
+                    OfflineIcon(
+                        modifier = Modifier.padding(all = 4.dp)
+                    )
+                }
                 IconButtonWithCallback(
                     onImageClick = onLogoutClick,
-                    imageVector = Icons.Default.Cancel,
+                    imageVector = Icons.AutoMirrored.Filled.Logout,
                     contentDescription = stringResource(R.string.log_out_button),
                     tint = MaterialTheme.colorScheme.onSurface,
                     enabled = true
@@ -160,6 +177,7 @@ fun UserEntry(
 @Preview(showBackground = true)
 fun ChatListVerticalPreview() {
     ChatListVertical(
+        isOffline = true,
         onLogoutClick = {},
         onRefreshClick = {},
         onCreateNewChatClick = {},

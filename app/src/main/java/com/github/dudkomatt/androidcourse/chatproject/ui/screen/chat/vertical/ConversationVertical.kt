@@ -23,6 +23,7 @@ import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -44,6 +45,7 @@ import com.github.dudkomatt.androidcourse.chatproject.ui.screen.chat.vertical.Pr
 import com.github.dudkomatt.androidcourse.chatproject.ui.screen.chat.vertical.PreviewData.getIncomingMessageWithImage
 import com.github.dudkomatt.androidcourse.chatproject.ui.screen.chat.vertical.PreviewData.getOutgoingMessage
 import com.github.dudkomatt.androidcourse.chatproject.ui.screen.component.IconButtonWithCallback
+import com.github.dudkomatt.androidcourse.chatproject.ui.screen.component.OfflineIcon
 import com.github.dudkomatt.androidcourse.chatproject.ui.screen.component.ReturnBackTopBarButton
 import com.github.dudkomatt.androidcourse.chatproject.ui.screen.component.TopBarText
 import com.github.dudkomatt.androidcourse.chatproject.ui.screen.loading.LoadingScreen
@@ -68,13 +70,16 @@ fun ConversationVertical(
         onBackClick()
     }
 
+    val lazyPagingItems = chatMessagesFlow.collectAsLazyPagingItems()
+
     Scaffold(
         modifier = modifier
             .fillMaxSize(),
         topBar = {
             ConversationTopBar(
                 username = selectedUsername,
-                onBackClick = onBackClick
+                onBackClick = onBackClick,
+                isOffline = lazyPagingItems.loadState.refresh is LoadState.Error
             )
         },
         bottomBar = {
@@ -84,10 +89,9 @@ fun ConversationVertical(
             )
         }
     ) { innerPadding ->
-        val lazyPagingItems = chatMessagesFlow.collectAsLazyPagingItems()
-
-        Box(modifier = Modifier.padding(innerPadding)) {
-
+        Box(
+            modifier = Modifier.padding(innerPadding)
+        ) {
             when (val state = lazyPagingItems.loadState.refresh) {
                 is LoadState.Loading -> {
                     LoadingScreen()
@@ -95,7 +99,10 @@ fun ConversationVertical(
 
                 is LoadState.Error -> {
                     Log.d("TAG", "ConversationVertical: ${state.error.message}")  // TODO
-                    Log.d("TAG", "ConversationVertical: ${state.error.stackTraceToString()}")  // TODO
+                    Log.d(
+                        "TAG",
+                        "ConversationVertical: ${state.error.stackTraceToString()}"
+                    )  // TODO
                     Text("Error ${state.error}")  // TODO
 
                     MessageLazyColumn(innerPadding, lazyPagingItems, loggedInUsername)
@@ -139,6 +146,7 @@ private fun MessageLazyColumn(
 fun ConversationTopBar(
     username: String,
     onBackClick: () -> Unit,
+    isOffline: Boolean,
     modifier: Modifier = Modifier
 ) {
     TopAppBar { barHeight ->
@@ -162,6 +170,16 @@ fun ConversationTopBar(
                 TopBarText(
                     text = username
                 )
+                if (isOffline) {
+                    Box(
+                        modifier = Modifier.fillMaxWidth(),
+                        contentAlignment = Alignment.CenterEnd
+                    ) {
+                        OfflineIcon(
+                            modifier = Modifier.padding(end = barHeight / 4)
+                        )
+                    }
+                }
             }
         }
     }

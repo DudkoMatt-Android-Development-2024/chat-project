@@ -35,6 +35,7 @@ sealed interface SelectedUiSubScreen {
 }
 
 data class ChatUiState(
+    var isOffline: Boolean = false,
     var selectedUiSubScreen: SelectedUiSubScreen? = null,
     var registeredUsersAndChannels: List<String>? = emptyList(),
 )
@@ -50,7 +51,7 @@ class ChatViewModel(
     private val _uiState = MutableStateFlow(ChatUiState())
     val uiState: StateFlow<ChatUiState> = _uiState.asStateFlow()
 
-    val chatDao = database.chatDao()
+    private val chatDao = database.chatDao()
 
     val chatListScrollState = LazyListState()
 
@@ -108,11 +109,11 @@ class ChatViewModel(
         viewModelScope.launch {
             try {
                 _uiState.value =
-                    _uiState.value.copy(registeredUsersAndChannels = listOf())
+                    _uiState.value.copy(isOffline = false, registeredUsersAndChannels = null)
                 val registeredUsersAndChannels = infoApi.getUsers() + infoApi.getChannels()
                 chatDao.insertAll(registeredUsersAndChannels.map { ChatEntity(it) })
                 _uiState.value =
-                    _uiState.value.copy(registeredUsersAndChannels = registeredUsersAndChannels)
+                    _uiState.value.copy(isOffline = false, registeredUsersAndChannels = registeredUsersAndChannels)
             } catch (e: Exception) {
                 Toast.makeText(
                     application.applicationContext,
@@ -121,6 +122,7 @@ class ChatViewModel(
                 ).show()
 
                 _uiState.value = _uiState.value.copy(
+                    isOffline = true,
                     registeredUsersAndChannels = chatDao
                         .getAll()
                         .map {

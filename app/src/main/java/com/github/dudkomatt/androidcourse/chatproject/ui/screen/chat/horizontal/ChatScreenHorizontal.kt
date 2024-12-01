@@ -36,13 +36,13 @@ fun ChatScreenHorizontal(
         val uiState by chatViewModel.uiState.collectAsState()
         val subScreen = uiState.selectedUiSubScreen
 
-        val registeredUsersAndChannels = uiState.registeredUsersAndChannels.orEmpty()
         ChatListVertical(
+            isOffline = uiState.isOffline,
             selectedUsername = if (subScreen is SelectedUiSubScreen.Conversation) subScreen.selectedUsername else null,
             onLogoutClick = onLogoutClick,
             onRefreshClick = chatViewModel::refresh,
             onCreateNewChatClick = chatViewModel::setIsNewChatScreen,
-            registeredUsersAndChannels = registeredUsersAndChannels,
+            registeredUsersAndChannels = uiState.registeredUsersAndChannels,
             onChatClick = chatViewModel::setSelectedUsername,
             modifier = modifier
                 .widthIn(min = 0.dp, max = 1000.dp)
