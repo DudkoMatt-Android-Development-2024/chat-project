@@ -5,23 +5,28 @@ import android.widget.Toast
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.paging.ExperimentalPagingApi
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
-import com.github.dudkomatt.androidcourse.chatproject.data.MessagePagingRepository
-import com.github.dudkomatt.androidcourse.chatproject.data.MessageSource
-import com.github.dudkomatt.androidcourse.chatproject.data.QueryParameters
+import com.github.dudkomatt.androidcourse.chatproject.data.paging.NetworkMessagePagingRepository
+import com.github.dudkomatt.androidcourse.chatproject.data.paging.MessageSource
 import com.github.dudkomatt.androidcourse.chatproject.data.UserSessionRepository
-import com.github.dudkomatt.androidcourse.chatproject.model.MessageModel
+import com.github.dudkomatt.androidcourse.chatproject.data.paging.MessagePagingRoomRepository
+import com.github.dudkomatt.androidcourse.chatproject.data.paging.MessageRemoteMediator
+import com.github.dudkomatt.androidcourse.chatproject.model.room.ChatEntity
+import com.github.dudkomatt.androidcourse.chatproject.model.room.MessageEntity
 import com.github.dudkomatt.androidcourse.chatproject.network.InfoApi
 import com.github.dudkomatt.androidcourse.chatproject.network.MessageApi
+import com.github.dudkomatt.androidcourse.chatproject.room.AppDatabase
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 
 sealed interface SelectedUiSubScreen {
@@ -31,8 +36,7 @@ sealed interface SelectedUiSubScreen {
 
 data class ChatUiState(
     var selectedUiSubScreen: SelectedUiSubScreen? = null,
-    var registeredUsers: List<String>? = emptyList(),
-    var channels: List<String>? = emptyList(),
+    var registeredUsersAndChannels: List<String>? = emptyList(),
 )
 
 class ChatViewModel(
@@ -40,29 +44,44 @@ class ChatViewModel(
     private val infoApi: InfoApi,
     private val userSessionRepository: UserSessionRepository,
     private val retrofitMessageApi: MessageApi,
+    private val database: AppDatabase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ChatUiState())
     val uiState: StateFlow<ChatUiState> = _uiState.asStateFlow()
 
+    val chatDao = database.chatDao()
+
     val chatListScrollState = LazyListState()
 
-    @OptIn(ExperimentalCoroutinesApi::class)
-    val pagingDataFlow: Flow<PagingData<MessageModel>> = uiState.flatMapLatest { state ->
-        val selectedUiSubScreen = state.selectedUiSubScreen
+    @OptIn(ExperimentalCoroutinesApi::class, ExperimentalPagingApi::class)
+    val pagingDataFlow: Flow<PagingData<MessageEntity>> = uiState.flatMapLatest { state ->
+        val messageSource = when (val selectedUiSubScreen = state.selectedUiSubScreen) {
+            is SelectedUiSubScreen.Conversation -> MessageSource.ChannelOrUser(
+                selectedUiSubScreen.selectedUsername
+            )
+
+            else -> return@flatMapLatest flowOf()
+        }
+
+        val networkMessagePagingRepository = NetworkMessagePagingRepository(
+            messageSource = messageSource,
+            retrofitMessageApi = retrofitMessageApi,
+            userSessionRepository = userSessionRepository
+        )
+
         Pager(
             config = PagingConfig(pageSize = 20),
-            initialKey = QueryParameters(),
+            initialKey = 0,
+            remoteMediator = MessageRemoteMediator(
+                messageSource = messageSource,
+                database = database,
+                networkMessagePagingRepository = networkMessagePagingRepository
+            ),
             pagingSourceFactory = {
-                MessagePagingRepository(
-                    userSessionRepository = userSessionRepository,
-                    retrofitMessageApi = retrofitMessageApi,
-                    messageSource = when (selectedUiSubScreen) {
-                        is SelectedUiSubScreen.Conversation -> MessageSource.ChannelOrUser(
-                            selectedUiSubScreen.selectedUsername
-                        )
-                        else -> null
-                    }
+                MessagePagingRoomRepository(
+                    messageSource = messageSource,
+                    messageDao = database.messageDao()
                 )
             }
         ).flow.cachedIn(viewModelScope)
@@ -89,16 +108,25 @@ class ChatViewModel(
         viewModelScope.launch {
             try {
                 _uiState.value =
-                    _uiState.value.copy(registeredUsers = listOf(), channels = listOf())
-                val users = infoApi.getUsers()
-                val channels = infoApi.getChannels()
-                _uiState.value = _uiState.value.copy(registeredUsers = users, channels = channels)
+                    _uiState.value.copy(registeredUsersAndChannels = listOf())
+                val registeredUsersAndChannels = infoApi.getUsers() + infoApi.getChannels()
+                chatDao.insertAll(registeredUsersAndChannels.map { ChatEntity(it) })
+                _uiState.value =
+                    _uiState.value.copy(registeredUsersAndChannels = registeredUsersAndChannels)
             } catch (e: Exception) {
                 Toast.makeText(
                     application.applicationContext,
                     "Registered users and channels fetch failed. Error: ${e.message}",
                     Toast.LENGTH_SHORT
                 ).show()
+
+                _uiState.value = _uiState.value.copy(
+                    registeredUsersAndChannels = chatDao
+                        .getAll()
+                        .map {
+                            it.from
+                        }
+                )
             }
         }
     }

@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -37,7 +36,7 @@ fun ChatScreenHorizontal(
         val uiState by chatViewModel.uiState.collectAsState()
         val subScreen = uiState.selectedUiSubScreen
 
-        val registeredUsersAndChannels = uiState.registeredUsers.orEmpty() + uiState.channels.orEmpty()
+        val registeredUsersAndChannels = uiState.registeredUsersAndChannels.orEmpty()
         ChatListVertical(
             selectedUsername = if (subScreen is SelectedUiSubScreen.Conversation) subScreen.selectedUsername else null,
             onLogoutClick = onLogoutClick,

@@ -1,38 +1,26 @@
-package com.github.dudkomatt.androidcourse.chatproject.data
+package com.github.dudkomatt.androidcourse.chatproject.data.paging
 
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
+import com.github.dudkomatt.androidcourse.chatproject.data.UserSessionRepository
 import com.github.dudkomatt.androidcourse.chatproject.exception.TokenMissingException
-import com.github.dudkomatt.androidcourse.chatproject.model.MessageModel
-import com.github.dudkomatt.androidcourse.chatproject.model.request.TextMessageRequest
+import com.github.dudkomatt.androidcourse.chatproject.model.retrofit.response.MessageModel
+import com.github.dudkomatt.androidcourse.chatproject.model.retrofit.request.TextMessageRequest
 import com.github.dudkomatt.androidcourse.chatproject.network.MessageApi
 import okhttp3.RequestBody
-
-class QueryParameters(
-    val lastKnownId: Int = 0,
-    val reverse: Boolean = false
-) {
-    fun next(lastKnownId: Int): QueryParameters {
-        return QueryParameters(
-            lastKnownId = lastKnownId,
-            reverse = reverse,
-        )
-    }
-}
 
 sealed interface MessageSource {
     data class Inbox(val username: String) : MessageSource
     data class ChannelOrUser(val channelOrUser: String) : MessageSource
 }
 
-// TODO - Здесь кэширование?
-class MessagePagingRepository(
-    private val userSessionRepository: UserSessionRepository,
+class NetworkMessagePagingRepository(
+    private val messageSource: MessageSource?,
     private val retrofitMessageApi: MessageApi,
-    private val messageSource: MessageSource?
-) : PagingSource<QueryParameters, MessageModel>() {
+    private val userSessionRepository: UserSessionRepository
+) : PagingSource<Int, MessageModel>() {
 
-    override fun getRefreshKey(state: PagingState<QueryParameters, MessageModel>): QueryParameters? {
+    override fun getRefreshKey(state: PagingState<Int, MessageModel>): Int? {
         // https://developer.android.com/topic/libraries/architecture/paging/v3-paged-data
 
         // Try to find the page key of the closest page to anchorPosition from
@@ -50,11 +38,11 @@ class MessagePagingRepository(
         }
     }
 
-    override suspend fun load(params: LoadParams<QueryParameters>): LoadResult<QueryParameters, MessageModel> {
+    override suspend fun load(params: LoadParams<Int>): LoadResult<Int, MessageModel> {
         // https://developer.android.com/topic/libraries/architecture/paging/v3-paged-data
 
         try {
-            val pageParameters = params.key ?: QueryParameters()
+            val lastKnownId = params.key ?: 0
 
             if (messageSource == null) {
                 return LoadResult.Page(
@@ -68,59 +56,59 @@ class MessagePagingRepository(
                 is MessageSource.ChannelOrUser -> getFromChannel(
                     limit = params.loadSize,
                     channelName = messageSource.channelOrUser,
-                    page = pageParameters
+                    lastKnownId = lastKnownId
                 )
 
                 is MessageSource.Inbox -> getUserInbox(
                     limit = params.loadSize,
                     username = messageSource.username,
-                    page = pageParameters
+                    lastKnownId = lastKnownId
                 )
             }
 
             return LoadResult.Page(
                 data = response,
                 prevKey = null, // Only paging forward
-                nextKey = if (response.isEmpty() || response.size < params.loadSize) null
-                else pageParameters.next(response.maxOf { it.id })
+                nextKey = if (isEndOfPaginationReached(response, params.loadSize)) null
+                else response.maxOf { it.id }
             )
         } catch (e: Exception) {
             return LoadResult.Error(e)
         }
     }
 
-    suspend fun getFrom1ch(limit: Int, page: QueryParameters): List<MessageModel> {
+    suspend fun getFrom1ch(limit: Int, lastKnownId: Int): List<MessageModel> {
         return retrofitMessageApi.getFrom1ch(
             limit = limit,
-            lastKnownId = page.lastKnownId,
-            reverse = page.reverse
+            lastKnownId = lastKnownId,
+            reverse = false
         )
     }
 
     suspend fun getFromChannel(
         limit: Int,
         channelName: String,
-        page: QueryParameters
+        lastKnownId: Int
     ): List<MessageModel> {
         return retrofitMessageApi.getFromChannel(
             channelName = channelName,
             limit = limit,
-            lastKnownId = page.lastKnownId,
-            reverse = page.reverse
+            lastKnownId = lastKnownId,
+            reverse = false
         )
     }
 
     suspend fun getUserInbox(
         limit: Int,
         username: String,
-        page: QueryParameters
+        lastKnownId: Int
     ): List<MessageModel> {
         return retrofitMessageApi.getUserInbox(
             token = getToken(),
             username = username,
             limit = limit,
-            lastKnownId = page.lastKnownId,
-            reverse = page.reverse
+            lastKnownId = lastKnownId,
+            reverse = false
         )
     }
 
@@ -148,4 +136,10 @@ class MessagePagingRepository(
 
     private suspend fun getToken(): String =
         userSessionRepository.getToken() ?: throw TokenMissingException()
+
+    companion object {
+        fun isEndOfPaginationReached(response: List<Any>, loadSize: Int): Boolean {
+            return response.isEmpty() || response.size < loadSize
+        }
+    }
 }

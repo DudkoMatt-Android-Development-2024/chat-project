@@ -1,4 +1,4 @@
-package com.github.dudkomatt.androidcourse.chatproject.model.request
+package com.github.dudkomatt.androidcourse.chatproject.model.retrofit.request
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable

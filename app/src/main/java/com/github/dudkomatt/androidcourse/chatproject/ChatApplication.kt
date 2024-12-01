@@ -1,9 +1,10 @@
 package com.github.dudkomatt.androidcourse.chatproject
 
 import android.app.Application
-import com.github.dudkomatt.androidcourse.chatproject.data.MessagePagingRepository
 import com.github.dudkomatt.androidcourse.chatproject.data.RetrofitConfigs
+import com.github.dudkomatt.androidcourse.chatproject.data.RoomConfigs
 import com.github.dudkomatt.androidcourse.chatproject.data.UserSessionRepository
+import com.github.dudkomatt.androidcourse.chatproject.data.paging.MessagePagingRoomRepository
 import com.github.dudkomatt.androidcourse.chatproject.viewmodel.ChatViewModel
 import com.github.dudkomatt.androidcourse.chatproject.viewmodel.RootViewModel
 import com.github.dudkomatt.androidcourse.chatproject.viewmodel.LoginViewModel
@@ -19,6 +20,7 @@ class ChatApplication : Application() {
         super.onCreate()
 
         val viewModelModule = module {
+            // Session token storage
             single { UserSessionRepository(androidContext()) }
 
             // Retrofit
@@ -27,7 +29,10 @@ class ChatApplication : Application() {
             single { RetrofitConfigs.infoRetrofitApi }
             single { RetrofitConfigs.messageRetrofitApi }
 
-            // Repositories
+            // Room
+            single { RoomConfigs.createRoomDb(androidContext()) }
+
+            // ViewModels
             viewModelOf(::RootViewModel)
             viewModelOf(::LoginViewModel)
             viewModelOf(::ChatViewModel)

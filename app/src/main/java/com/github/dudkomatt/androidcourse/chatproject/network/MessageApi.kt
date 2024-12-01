@@ -1,8 +1,8 @@
 package com.github.dudkomatt.androidcourse.chatproject.network
 
 import com.github.dudkomatt.androidcourse.chatproject.data.RetrofitConfigs
-import com.github.dudkomatt.androidcourse.chatproject.model.MessageModel
-import com.github.dudkomatt.androidcourse.chatproject.model.request.TextMessageRequest
+import com.github.dudkomatt.androidcourse.chatproject.model.retrofit.response.MessageModel
+import com.github.dudkomatt.androidcourse.chatproject.model.retrofit.request.TextMessageRequest
 import okhttp3.RequestBody
 import retrofit2.http.Body
 import retrofit2.http.GET

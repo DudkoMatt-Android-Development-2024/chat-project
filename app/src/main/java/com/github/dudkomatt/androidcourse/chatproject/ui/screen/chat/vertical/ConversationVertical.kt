@@ -30,12 +30,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.github.dudkomatt.androidcourse.chatproject.R
-import com.github.dudkomatt.androidcourse.chatproject.model.MessageModel
+import com.github.dudkomatt.androidcourse.chatproject.model.retrofit.response.MessageModel
 import com.github.dudkomatt.androidcourse.chatproject.ui.screen.component.ThumbProfileImage
 import com.github.dudkomatt.androidcourse.chatproject.ui.screen.component.TopAppBar
 import androidx.paging.LoadState
 import androidx.paging.PagingData
 import androidx.paging.compose.collectAsLazyPagingItems
+import com.github.dudkomatt.androidcourse.chatproject.model.room.MessageEntity
 import com.github.dudkomatt.androidcourse.chatproject.ui.screen.chat.vertical.PreviewData.CURRENT_USERNAME
 import com.github.dudkomatt.androidcourse.chatproject.ui.screen.chat.vertical.PreviewData.getIncomingMessage
 import com.github.dudkomatt.androidcourse.chatproject.ui.screen.chat.vertical.PreviewData.getIncomingMessageWithImage
@@ -57,7 +58,7 @@ fun ConversationVertical(
     onAttachImageClick: () -> Unit,
     onSendClick: () -> Unit,
     loggedInUsername: String,
-    chatMessagesFlow: Flow<PagingData<MessageModel>>,
+    chatMessagesFlow: Flow<PagingData<MessageEntity>>,
     modifier: Modifier = Modifier,
 ) {
     BackHandler {
@@ -160,7 +161,7 @@ fun ConversationTopBar(
 @Composable
 fun MessageEntry(
     loggedInUsername: String,
-    message: MessageModel
+    message: MessageEntity
 ) {
     val isOwnMessage = message.from == loggedInUsername
 
@@ -179,15 +180,15 @@ fun MessageEntry(
             Column(
                 modifier = Modifier.padding(8.dp)
             ) {
-                if (message.data.text != null) {
+                if (message.text != null) {
                     Text(
-                        text = message.data.text.text,
+                        text = message.text,
                         style = MaterialTheme.typography.bodyMedium,
                     )
                 }
 
-                if (message.data.image != null) {
-                    Text("There must be an image ${message.data.image.link}")  // TODO
+                if (message.imageUrl != null) {
+                    Text("There must be an image ${message.imageUrl}")  // TODO
                 }
             }
         }
@@ -324,14 +325,13 @@ object PreviewData {
         anotherUser: String,
         id: Int = 1,
         currentUsername: String = CURRENT_USERNAME
-    ): MessageModel {
-        return MessageModel(
+    ): MessageEntity {
+        return MessageEntity(
             id,
             anotherUser,
             currentUsername,
-            MessageModel.TextMessageInner(
-                text = MessageModel.TextPayload("Incoming message")
-            ),
+            "Incoming message",
+            null,
             LocalDateTime(2024, 1, 1, 1, 1)
                 .toInstant(TimeZone.of("Europe/Moscow"))
                 .epochSeconds
@@ -342,14 +342,13 @@ object PreviewData {
         anotherUser: String,
         id: Int = 2,
         currentUsername: String = CURRENT_USERNAME
-    ): MessageModel {
-        return MessageModel(
+    ): MessageEntity {
+        return MessageEntity(
             id,
             currentUsername,
             anotherUser,
-            MessageModel.TextMessageInner(
-                text = MessageModel.TextPayload("Outgoing message")
-            ),
+            "Outgoing message",
+            null,
             LocalDateTime(2024, 1, 1, 1, 2)
                 .toInstant(TimeZone.of("Europe/Moscow"))
                 .epochSeconds
@@ -360,15 +359,13 @@ object PreviewData {
         anotherUser: String,
         id: Int = 3,
         currentUsername: String = CURRENT_USERNAME
-    ): MessageModel {
-        return MessageModel(
+    ): MessageEntity {
+        return MessageEntity(
             id,
             anotherUser,
             currentUsername,
-            MessageModel.TextMessageInner(
-                text = MessageModel.TextPayload("Incoming message from another user with image"),
-                image = MessageModel.ImagePayload("tool/tmp/scala-spiral.png")
-            ),
+            "Incoming message from another user with image",
+            "tool/tmp/scala-spiral.png",
             LocalDateTime(2024, 1, 1, 1, 2)
                 .toInstant(TimeZone.of("Europe/Moscow"))
                 .epochSeconds

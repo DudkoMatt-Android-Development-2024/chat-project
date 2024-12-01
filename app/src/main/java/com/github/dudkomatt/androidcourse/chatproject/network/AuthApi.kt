@@ -1,7 +1,7 @@
 package com.github.dudkomatt.androidcourse.chatproject.network
 
 import com.github.dudkomatt.androidcourse.chatproject.data.RetrofitConfigs
-import com.github.dudkomatt.androidcourse.chatproject.model.request.LoginRequest
+import com.github.dudkomatt.androidcourse.chatproject.model.retrofit.request.LoginRequest
 import okhttp3.ResponseBody
 import retrofit2.Response
 import retrofit2.http.Body

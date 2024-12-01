@@ -1,8 +1,13 @@
 package com.github.dudkomatt.androidcourse.chatproject.viewmodel
 
+import android.util.Log
+import android.widget.Toast
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.room.PrimaryKey
+import com.github.dudkomatt.androidcourse.chatproject.data.LogConfig
 import com.github.dudkomatt.androidcourse.chatproject.data.UserSessionRepository
+import com.github.dudkomatt.androidcourse.chatproject.network.AuthApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -19,7 +24,8 @@ data class RootUIState(
 }
 
 class RootViewModel(
-    private val userSessionRepository: UserSessionRepository
+    private val userSessionRepository: UserSessionRepository,
+    private val authApi: AuthApi
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(RootUIState())
     val uiState: StateFlow<RootUIState> = _uiState.asStateFlow()
@@ -41,6 +47,19 @@ class RootViewModel(
 
     fun logOut() {
         viewModelScope.launch {
+            _uiState.value.token?.let {
+                try {
+                    authApi.logoutPost(it)
+                } catch (e: Exception) {
+                    // Ignore any errors
+                    Log.e(
+                        LogConfig.ERROR_LOGOUT_TAG,
+                        "logOut: Exception occurred. Resetting UI state",
+                        e
+                    )
+                }
+            }
+
             userSessionRepository.removeUserInfo()
             retrieveUsernameAndToken()
         }

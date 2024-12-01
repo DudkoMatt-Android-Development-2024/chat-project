@@ -1,5 +1,6 @@
-package com.github.dudkomatt.androidcourse.chatproject.model
+package com.github.dudkomatt.androidcourse.chatproject.model.retrofit.response
 
+import com.github.dudkomatt.androidcourse.chatproject.model.room.MessageEntity
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -30,4 +31,15 @@ data class MessageModel(
     ) {
         fun getLinkWithSeparator() = "/$link"
     }
+}
+
+fun MessageModel.toMessageEntity(): MessageEntity = this.let {
+    MessageEntity(
+        id = it.id,
+        from = it.from,
+        to = it.to,
+        text = it.data.text?.text,
+        imageUrl = it.data.image?.link,
+        time = it.time
+    )
 }
