@@ -1,11 +1,9 @@
 package com.github.dudkomatt.androidcourse.chatproject.viewmodel
 
 import android.util.Log
-import android.widget.Toast
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.room.PrimaryKey
-import com.github.dudkomatt.androidcourse.chatproject.data.LogConfig
+import com.github.dudkomatt.androidcourse.chatproject.config.LogConfig
 import com.github.dudkomatt.androidcourse.chatproject.data.UserSessionRepository
 import com.github.dudkomatt.androidcourse.chatproject.network.AuthApi
 import kotlinx.coroutines.flow.MutableStateFlow

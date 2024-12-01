@@ -1,6 +1,6 @@
 package com.github.dudkomatt.androidcourse.chatproject.network
 
-import com.github.dudkomatt.androidcourse.chatproject.data.RetrofitConfigs
+import com.github.dudkomatt.androidcourse.chatproject.config.RetrofitConfig
 import com.github.dudkomatt.androidcourse.chatproject.model.retrofit.request.LoginRequest
 import okhttp3.ResponseBody
 import retrofit2.Response
@@ -19,5 +19,5 @@ interface AuthApi {
     suspend fun loginPost(@Body loginRequest: LoginRequest): Response<ResponseBody>
 
     @POST("/logout")
-    suspend fun logoutPost(@Header(RetrofitConfigs.X_AUTH_TOKEN_HEADER) token: String)
+    suspend fun logoutPost(@Header(RetrofitConfig.X_AUTH_TOKEN_HEADER) token: String)
 }

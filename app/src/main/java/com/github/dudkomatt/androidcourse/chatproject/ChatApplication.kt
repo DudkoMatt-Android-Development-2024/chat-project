@@ -1,8 +1,14 @@
 package com.github.dudkomatt.androidcourse.chatproject
 
 import android.app.Application
-import com.github.dudkomatt.androidcourse.chatproject.data.RetrofitConfigs
-import com.github.dudkomatt.androidcourse.chatproject.data.RoomConfigs
+import coil3.ImageLoader
+import coil3.SingletonImageLoader
+import coil3.disk.DiskCache
+import coil3.disk.directory
+import coil3.memory.MemoryCache
+import coil3.request.crossfade
+import com.github.dudkomatt.androidcourse.chatproject.config.RetrofitConfig
+import com.github.dudkomatt.androidcourse.chatproject.config.RoomConfigs
 import com.github.dudkomatt.androidcourse.chatproject.data.UserSessionRepository
 import com.github.dudkomatt.androidcourse.chatproject.viewmodel.ChatViewModel
 import com.github.dudkomatt.androidcourse.chatproject.viewmodel.RootViewModel
@@ -23,10 +29,9 @@ class ChatApplication : Application() {
             single { UserSessionRepository(androidContext()) }
 
             // Retrofit
-            single { RetrofitConfigs.authRetrofitApi }
-            single { RetrofitConfigs.imageRetrofitApi }
-            single { RetrofitConfigs.infoRetrofitApi }
-            single { RetrofitConfigs.messageRetrofitApi }
+            single { RetrofitConfig.authRetrofitApi }
+            single { RetrofitConfig.infoRetrofitApi }
+            single { RetrofitConfig.messageRetrofitApi }
 
             // Room
             single { RoomConfigs.createRoomDb(androidContext()) }
@@ -35,6 +40,24 @@ class ChatApplication : Application() {
             viewModelOf(::RootViewModel)
             viewModelOf(::LoginViewModel)
             viewModelOf(::ChatViewModel)
+        }
+
+        // Coin
+        SingletonImageLoader.setSafe {
+            ImageLoader.Builder(this@ChatApplication)
+                .memoryCache {
+                    MemoryCache.Builder()
+                        .maxSizePercent(this@ChatApplication, 0.25)
+                        .build()
+                }
+                .diskCache {
+                    DiskCache.Builder()
+                        .directory(this@ChatApplication.cacheDir.resolve("image_cache"))
+                        .maxSizePercent(0.02)
+                        .build()
+                }
+                .crossfade(true)
+                .build()
         }
 
         startKoin {

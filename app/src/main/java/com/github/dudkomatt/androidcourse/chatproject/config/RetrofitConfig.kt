@@ -1,7 +1,6 @@
-package com.github.dudkomatt.androidcourse.chatproject.data
+package com.github.dudkomatt.androidcourse.chatproject.config
 
 import com.github.dudkomatt.androidcourse.chatproject.network.AuthApi
-import com.github.dudkomatt.androidcourse.chatproject.network.ImageApi
 import com.github.dudkomatt.androidcourse.chatproject.network.InfoApi
 import com.github.dudkomatt.androidcourse.chatproject.network.MessageApi
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
@@ -12,10 +11,10 @@ import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 
 
-object RetrofitConfigs {
+object RetrofitConfig {
     const val X_AUTH_TOKEN_HEADER = "X-Auth-Token"
 
-    private const val BASE_URL = "https://faerytea.name:8008"
+    const val BASE_URL = "https://faerytea.name:8008"
 
     private fun getOkHttpClient(): OkHttpClient {
         val loggingInterceptor = HttpLoggingInterceptor()
@@ -34,10 +33,6 @@ object RetrofitConfigs {
 
     val authRetrofitApi: AuthApi by lazy {
         retrofit.create(AuthApi::class.java)
-    }
-
-    val imageRetrofitApi: ImageApi by lazy {
-        retrofit.create(ImageApi::class.java)
     }
 
     val infoRetrofitApi: InfoApi by lazy {

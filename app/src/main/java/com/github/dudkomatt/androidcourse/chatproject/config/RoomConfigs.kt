@@ -1,4 +1,4 @@
-package com.github.dudkomatt.androidcourse.chatproject.data
+package com.github.dudkomatt.androidcourse.chatproject.config
 
 import android.content.Context
 import androidx.room.Room

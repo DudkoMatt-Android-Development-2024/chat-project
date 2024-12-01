@@ -16,6 +16,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.AttachFile
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -30,6 +31,8 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -40,6 +43,10 @@ import androidx.paging.LoadState
 import androidx.paging.PagingData
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
+import coil3.SingletonImageLoader
+import coil3.compose.AsyncImage
+import coil3.compose.SubcomposeAsyncImage
+import com.github.dudkomatt.androidcourse.chatproject.config.ImageConfig
 import com.github.dudkomatt.androidcourse.chatproject.model.room.MessageEntity
 import com.github.dudkomatt.androidcourse.chatproject.ui.screen.chat.vertical.PreviewData.CURRENT_USERNAME
 import com.github.dudkomatt.androidcourse.chatproject.ui.screen.chat.vertical.PreviewData.getIncomingMessage
@@ -235,11 +242,35 @@ fun MessageEntry(
                 }
 
                 if (message.imageUrl != null) {
-                    Text("There must be an image ${message.imageUrl}")  // TODO
+                    AsyncImageChatEntry(
+                        imageUrl = message.imageUrl,
+                        isThumb = true,
+                    )
                 }
             }
         }
     }
+}
+
+@Composable
+fun AsyncImageChatEntry(
+    imageUrl: String,
+    isThumb: Boolean,
+    modifier: Modifier = Modifier
+) {
+    val context = LocalContext.current
+    SubcomposeAsyncImage(
+        modifier = modifier,
+        loading = {
+            CircularProgressIndicator(
+                color = MaterialTheme.colorScheme.onPrimary,
+            )
+        },
+        model = if (isThumb) ImageConfig.getThumbImageUrl(imageUrl)
+        else ImageConfig.getFullImageUrl(imageUrl),
+        contentDescription = null,
+        imageLoader = SingletonImageLoader.get(context)
+    )
 }
 
 @Composable
