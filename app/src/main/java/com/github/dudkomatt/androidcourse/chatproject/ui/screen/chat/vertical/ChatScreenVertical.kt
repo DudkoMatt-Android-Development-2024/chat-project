@@ -27,7 +27,8 @@ fun ChatScreenVertical(
                 onAttachImageClick = {},  // TODO - Attach images
                 onSendClick = {},
                 loggedInUsername = username,
-                chatMessagesFlow = chatViewModel.pagingDataFlow
+                chatMessagesFlow = chatViewModel.pagingDataFlow,
+                onImageClick = chatViewModel::showFullImage
             )
         }
         SelectedUiSubScreen.NewChat -> {
@@ -42,7 +43,7 @@ fun ChatScreenVertical(
                 isOffline = uiState.isOffline,
                 selectedUsername = null,
                 onLogoutClick = onLogoutClick,
-                onRefreshClick = chatViewModel::refresh,
+                onRefreshClick = chatViewModel::refreshChatList,
                 onCreateNewChatClick = chatViewModel::setIsNewChatScreen,
                 registeredUsersAndChannels = uiState.registeredUsersAndChannels,
                 onChatClick = chatViewModel::setSelectedUsername,

@@ -2,6 +2,7 @@ package com.github.dudkomatt.androidcourse.chatproject.ui.screen.chat.vertical
 
 import android.util.Log
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,7 +17,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.AttachFile
 import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -31,8 +31,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -43,15 +41,12 @@ import androidx.paging.LoadState
 import androidx.paging.PagingData
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
-import coil3.SingletonImageLoader
-import coil3.compose.AsyncImage
-import coil3.compose.SubcomposeAsyncImage
-import com.github.dudkomatt.androidcourse.chatproject.config.ImageConfig
 import com.github.dudkomatt.androidcourse.chatproject.model.room.MessageEntity
 import com.github.dudkomatt.androidcourse.chatproject.ui.screen.chat.vertical.PreviewData.CURRENT_USERNAME
 import com.github.dudkomatt.androidcourse.chatproject.ui.screen.chat.vertical.PreviewData.getIncomingMessage
 import com.github.dudkomatt.androidcourse.chatproject.ui.screen.chat.vertical.PreviewData.getIncomingMessageWithImage
 import com.github.dudkomatt.androidcourse.chatproject.ui.screen.chat.vertical.PreviewData.getOutgoingMessage
+import com.github.dudkomatt.androidcourse.chatproject.ui.screen.component.AsyncImageComponent
 import com.github.dudkomatt.androidcourse.chatproject.ui.screen.component.IconButtonWithCallback
 import com.github.dudkomatt.androidcourse.chatproject.ui.screen.component.OfflineIcon
 import com.github.dudkomatt.androidcourse.chatproject.ui.screen.component.ReturnBackTopBarButton
@@ -71,6 +66,7 @@ fun ConversationVertical(
     onBackClick: () -> Unit,
     onAttachImageClick: () -> Unit,
     onSendClick: () -> Unit,
+    onImageClick: (String) -> Unit,
     loggedInUsername: String,
     chatMessagesFlow: Flow<PagingData<MessageEntity>>,
     modifier: Modifier = Modifier,
@@ -115,11 +111,21 @@ fun ConversationVertical(
                     )  // TODO
                     Text("Error ${state.error}")  // TODO
 
-                    MessageLazyColumn(innerPadding, lazyPagingItems, loggedInUsername)
+                    MessageLazyColumn(
+                        innerPadding = innerPadding,
+                        lazyPagingItems = lazyPagingItems,
+                        loggedInUsername = loggedInUsername,
+                        onImageClick = onImageClick
+                    )
                 }
 
                 is LoadState.NotLoading -> {
-                    MessageLazyColumn(innerPadding, lazyPagingItems, loggedInUsername)
+                    MessageLazyColumn(
+                        innerPadding = innerPadding,
+                        lazyPagingItems = lazyPagingItems,
+                        loggedInUsername = loggedInUsername,
+                        onImageClick = onImageClick
+                    )
                 }
 
                 else -> Text("Something else")  // TODO
@@ -133,7 +139,8 @@ fun ConversationVertical(
 private fun MessageLazyColumn(
     innerPadding: PaddingValues,
     lazyPagingItems: LazyPagingItems<MessageEntity>,
-    loggedInUsername: String
+    loggedInUsername: String,
+    onImageClick: (String) -> Unit
 ) {
     LazyColumn(
         modifier = Modifier
@@ -145,7 +152,8 @@ private fun MessageLazyColumn(
             if (item != null) {
                 MessageEntry(
                     loggedInUsername = loggedInUsername,
-                    message = item
+                    message = item,
+                    onImageClick = onImageClick
                 )
             }
         }
@@ -215,6 +223,7 @@ fun RefreshButton(modifier: Modifier = Modifier, onRefreshClick: () -> Unit) {
 @Composable
 fun MessageEntry(
     loggedInUsername: String,
+    onImageClick: (String) -> Unit,
     message: MessageEntity
 ) {
     val isOwnMessage = message.from == loggedInUsername
@@ -242,7 +251,10 @@ fun MessageEntry(
                 }
 
                 if (message.imageUrl != null) {
-                    AsyncImageChatEntry(
+                    AsyncImageComponent(
+                        modifier = Modifier.clickable {
+                            onImageClick(message.imageUrl)
+                        },
                         imageUrl = message.imageUrl,
                         isThumb = true,
                     )
@@ -250,27 +262,6 @@ fun MessageEntry(
             }
         }
     }
-}
-
-@Composable
-fun AsyncImageChatEntry(
-    imageUrl: String,
-    isThumb: Boolean,
-    modifier: Modifier = Modifier
-) {
-    val context = LocalContext.current
-    SubcomposeAsyncImage(
-        modifier = modifier,
-        loading = {
-            CircularProgressIndicator(
-                color = MaterialTheme.colorScheme.onPrimary,
-            )
-        },
-        model = if (isThumb) ImageConfig.getThumbImageUrl(imageUrl)
-        else ImageConfig.getFullImageUrl(imageUrl),
-        contentDescription = null,
-        imageLoader = SingletonImageLoader.get(context)
-    )
 }
 
 @Composable
@@ -384,7 +375,8 @@ fun ConversationVerticalPreview() {
         chatMessagesFlow = MutableStateFlow(PagingData.from(messages)),
         onSendClick = {},
         loggedInUsername = CURRENT_USERNAME,
-        selectedUsername = "Selected username"
+        selectedUsername = "Selected username",
+        onImageClick = {}
     )
 }
 
@@ -392,8 +384,8 @@ fun ConversationVerticalPreview() {
 @Preview(showBackground = true)
 fun MessageEntryPreview() {
     Column {
-        MessageEntry(CURRENT_USERNAME, getIncomingMessage(anotherUser = "anotherUser"))
-        MessageEntry(CURRENT_USERNAME, getOutgoingMessage(anotherUser = "anotherUser"))
+        MessageEntry(loggedInUsername = CURRENT_USERNAME, onImageClick = {}, message = getIncomingMessage(anotherUser = "anotherUser"))
+        MessageEntry(loggedInUsername = CURRENT_USERNAME, onImageClick = {}, message = getOutgoingMessage(anotherUser = "anotherUser"))
     }
 }
 

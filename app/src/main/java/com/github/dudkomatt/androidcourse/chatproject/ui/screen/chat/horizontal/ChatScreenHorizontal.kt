@@ -40,7 +40,7 @@ fun ChatScreenHorizontal(
             isOffline = uiState.isOffline,
             selectedUsername = if (subScreen is SelectedUiSubScreen.Conversation) subScreen.selectedUsername else null,
             onLogoutClick = onLogoutClick,
-            onRefreshClick = chatViewModel::refresh,
+            onRefreshClick = chatViewModel::refreshChatList,
             onCreateNewChatClick = chatViewModel::setIsNewChatScreen,
             registeredUsersAndChannels = uiState.registeredUsersAndChannels,
             onChatClick = chatViewModel::setSelectedUsername,
@@ -59,7 +59,8 @@ fun ChatScreenHorizontal(
                     onAttachImageClick = {},  // TODO - Attach images
                     onSendClick = {},
                     loggedInUsername = username,
-                    chatMessagesFlow = chatViewModel.pagingDataFlow
+                    chatMessagesFlow = chatViewModel.pagingDataFlow,
+                    onImageClick = chatViewModel::showFullImage
                 )
             }
             SelectedUiSubScreen.NewChat -> {

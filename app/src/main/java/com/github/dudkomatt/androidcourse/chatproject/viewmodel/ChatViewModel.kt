@@ -36,6 +36,7 @@ sealed interface SelectedUiSubScreen {
 
 data class ChatUiState(
     var isOffline: Boolean = false,
+    var selectedImageUrl: String? = null,
     var selectedUiSubScreen: SelectedUiSubScreen? = null,
     var registeredUsersAndChannels: List<String>? = null,
 )
@@ -87,7 +88,7 @@ class ChatViewModel(
     }
 
     init {
-        refresh()
+        refreshChatList()
     }
 
     fun refreshConversation() {
@@ -111,7 +112,15 @@ class ChatViewModel(
             _uiState.value.copy(selectedUiSubScreen = SelectedUiSubScreen.Conversation(username))
     }
 
-    fun refresh() {
+    fun showFullImage(imageUrl: String) {
+        _uiState.value = _uiState.value.copy(selectedImageUrl = imageUrl)
+    }
+
+    fun resetFullScreenImage() {
+        _uiState.value = _uiState.value.copy(selectedImageUrl = null)
+    }
+
+    fun refreshChatList() {
         viewModelScope.launch {
             try {
                 _uiState.value =
