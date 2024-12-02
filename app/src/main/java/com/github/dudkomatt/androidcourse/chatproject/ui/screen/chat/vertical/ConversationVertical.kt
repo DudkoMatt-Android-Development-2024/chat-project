@@ -190,19 +190,22 @@ fun ConversationTopBar(
             ) {
                 ThumbProfileImage()
                 TopBarText(
+                    modifier = Modifier.weight(1f),
                     text = username
                 )
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.End,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     if (isOffline) {
                         OfflineIcon(
-                            modifier = Modifier.padding(end = barHeight / 4)
+                            modifier = Modifier.padding(end = barHeight / 8)
                         )
                     }
-                    RefreshButton(onRefreshClick = onChatRefreshClick)
+                    RefreshButton(
+                        modifier = Modifier.padding(end = 4.dp),
+                        onRefreshClick = onChatRefreshClick
+                    )
                 }
             }
         }
@@ -345,6 +348,17 @@ fun SendMessageBottomBarButton(
             modifier = modifier
         )
     }
+}
+
+@Composable
+@Preview
+fun ConversationTopBarPreview() {
+    ConversationTopBar(
+        username = "A very loooooooong username",
+        onChatRefreshClick = {},
+        onBackClick = {},
+        isOffline = true
+    )
 }
 
 @Composable

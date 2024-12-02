@@ -5,15 +5,18 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 
 @Composable
 fun TopBarText(
-    text: String
+    text: String,
+    modifier: Modifier = Modifier
 ) {
     Text(
-        modifier = Modifier.padding(12.dp),
+        modifier = modifier.padding(12.dp),
         text = text,
-        style = MaterialTheme.typography.titleLarge
+        style = MaterialTheme.typography.titleLarge,
+        overflow = TextOverflow.Ellipsis
     )
 }
