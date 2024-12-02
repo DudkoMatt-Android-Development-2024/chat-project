@@ -62,10 +62,9 @@ import kotlinx.datetime.toInstant
 @Composable
 fun ConversationVertical(
     selectedUsername: String,
-    onChatRefreshClick: () -> Unit,
     onBackClick: () -> Unit,
     onAttachImageClick: () -> Unit,
-    onSendClick: () -> Unit,
+    onSendClick: (String) -> Unit,
     onImageClick: (String) -> Unit,
     loggedInUsername: String,
     chatMessagesFlow: Flow<PagingData<MessageEntity>>,
@@ -83,7 +82,7 @@ fun ConversationVertical(
         topBar = {
             ConversationTopBar(
                 username = selectedUsername,
-                onChatRefreshClick = onChatRefreshClick,
+                onChatRefreshClick = lazyPagingItems::refresh,
                 onBackClick = onBackClick,
                 isOffline = lazyPagingItems.loadState.refresh is LoadState.Error
             )
@@ -267,7 +266,7 @@ fun MessageEntry(
 @Composable
 fun ConversationBottomBar(
     onAttachImageClick: () -> Unit,
-    onSendClick: () -> Unit,
+    onSendClick: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Surface(
@@ -299,7 +298,10 @@ fun ConversationBottomBar(
 
             SendMessageBottomBarButton(
                 modifier = Modifier.padding(padding),
-                onSendClick = onSendClick,
+                onSendClick = {
+                    onSendClick(prompt)
+                    prompt = ""
+                },
                 enabled = prompt.isNotBlank()
             )
         }
@@ -369,7 +371,6 @@ fun ConversationVerticalPreview() {
     )
 
     ConversationVertical(
-        onChatRefreshClick = {},
         onBackClick = {},
         onAttachImageClick = {},
         chatMessagesFlow = MutableStateFlow(PagingData.from(messages)),
@@ -384,8 +385,16 @@ fun ConversationVerticalPreview() {
 @Preview(showBackground = true)
 fun MessageEntryPreview() {
     Column {
-        MessageEntry(loggedInUsername = CURRENT_USERNAME, onImageClick = {}, message = getIncomingMessage(anotherUser = "anotherUser"))
-        MessageEntry(loggedInUsername = CURRENT_USERNAME, onImageClick = {}, message = getOutgoingMessage(anotherUser = "anotherUser"))
+        MessageEntry(
+            loggedInUsername = CURRENT_USERNAME,
+            onImageClick = {},
+            message = getIncomingMessage(anotherUser = "anotherUser")
+        )
+        MessageEntry(
+            loggedInUsername = CURRENT_USERNAME,
+            onImageClick = {},
+            message = getOutgoingMessage(anotherUser = "anotherUser")
+        )
     }
 }
 

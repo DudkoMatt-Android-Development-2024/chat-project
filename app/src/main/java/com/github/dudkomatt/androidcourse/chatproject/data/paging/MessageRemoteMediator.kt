@@ -22,23 +22,9 @@ class MessageRemoteMediator(
     private val messageSource: MessageSource?,
     private val database: AppDatabase,
     private val networkMessagePagingRepository: NetworkMessagePagingRepository,
-    private val viewModelRunScope: CoroutineScope,
-    private val refreshSharedFlow: SharedFlow<Unit>,
     private val pagingConfig: PagingConfig
 ) : RemoteMediator<Int, MessageEntity>() {
     private val messageDao = database.messageDao()
-
-    init {
-        viewModelRunScope.launch {
-            refreshSharedFlow.onEach {
-                refresh()
-            }.collect()
-        }
-    }
-
-    private suspend fun refresh() {
-        load(LoadType.REFRESH, PagingState(pages = listOf(), anchorPosition = null, config = pagingConfig, 0))
-    }
 
     // https://developer.android.com/topic/libraries/architecture/paging/v3-network-db#item-keys
     override suspend fun load(

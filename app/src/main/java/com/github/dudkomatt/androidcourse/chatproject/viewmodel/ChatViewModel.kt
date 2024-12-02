@@ -1,7 +1,6 @@
 package com.github.dudkomatt.androidcourse.chatproject.viewmodel
 
 import android.app.Application
-import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.lifecycle.ViewModel
@@ -23,10 +22,8 @@ import com.github.dudkomatt.androidcourse.chatproject.network.MessageApi
 import com.github.dudkomatt.androidcourse.chatproject.room.AppDatabase
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
@@ -58,9 +55,6 @@ class ChatViewModel(
 
     private val _uiState = MutableStateFlow(ChatUiState())
     val uiState: StateFlow<ChatUiState> = _uiState.asStateFlow()
-
-    private val _refreshConversationTrigger = MutableSharedFlow<Unit>()
-    private val refreshConversationTrigger = _refreshConversationTrigger.asSharedFlow()
 
     private val chatDao = database.chatDao()
 
@@ -94,8 +88,6 @@ class ChatViewModel(
                 database = database,
                 networkMessagePagingRepository = networkMessagePagingRepository,
                 pagingConfig = pagingConfig,
-                viewModelRunScope = viewModelScope,
-                refreshSharedFlow = refreshConversationTrigger,
             ),
             pagingSourceFactory = {
                 database.messageDao().getBy(messageSource.channelOrUser)
@@ -105,12 +97,6 @@ class ChatViewModel(
 
     init {
         refreshChatList()
-    }
-
-    fun refreshConversation() {
-        viewModelScope.launch {
-            _refreshConversationTrigger.emit(Unit)
-        }
     }
 
     fun setIsNewChatScreen() {
@@ -126,7 +112,7 @@ class ChatViewModel(
             _uiState.value.copy(selectedUiSubScreen = SelectedUiSubScreen.Conversation(username))
     }
 
-    fun sendTextOnlyMessage(text: String) {
+    fun sendMessage(text: String) {
         val fromUsername = rootViewModel.uiState.value.username ?: return
         val toUsername = when (val selectedUiSubScreen = _uiState.value.selectedUiSubScreen) {
             is SelectedUiSubScreen.Conversation -> MessageSource.ChannelOrUser(
@@ -147,7 +133,6 @@ class ChatViewModel(
                     )
                 ),
             )
-            _refreshConversationTrigger.emit(Unit)
         }
     }
 
