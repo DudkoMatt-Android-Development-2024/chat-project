@@ -2,6 +2,7 @@ package com.github.dudkomatt.androidcourse.chatproject.data.paging
 
 import android.util.Log
 import androidx.paging.ExperimentalPagingApi
+import androidx.paging.LoadState.Loading.endOfPaginationReached
 import androidx.paging.LoadType
 import androidx.paging.PagingConfig
 import androidx.paging.PagingState
@@ -48,11 +49,11 @@ class MessageRemoteMediator(
                 }
 
                 LoadType.APPEND -> {
-                    val lastItem = state.lastItemOrNull() ?: return MediatorResult.Success(
+                    val lastPage = state.pages.lastOrNull() ?: return MediatorResult.Success(
                         endOfPaginationReached = true
                     )
 
-                    lastItem.id
+                    lastPage.data.maxOfOrNull { it.id }
                 }
             }
 
