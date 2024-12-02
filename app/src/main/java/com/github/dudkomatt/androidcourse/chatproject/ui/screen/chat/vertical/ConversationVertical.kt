@@ -15,6 +15,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
+import androidx.compose.material.icons.automirrored.outlined.Send
+import androidx.compose.material.icons.automirrored.rounded.Send
+import androidx.compose.material.icons.automirrored.sharp.Send
 import androidx.compose.material.icons.filled.AttachFile
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Icon
@@ -32,6 +35,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.ImeAction.Companion.Send
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.github.dudkomatt.androidcourse.chatproject.R
@@ -329,14 +333,18 @@ fun SendMessageBottomBarButton(
     enabled: Boolean,
     modifier: Modifier = Modifier
 ) {
-    IconButtonWithCallback(
-        onImageClick = onSendClick,
-        imageVector = Icons.AutoMirrored.Filled.Send,
-        contentDescription = stringResource(id = R.string.back_button_content_description),
-        tint = if (enabled) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurface,
-        enabled = enabled,
-        modifier = modifier
-    )
+    Surface(
+        color = if (enabled) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.tertiary
+    ) {
+        IconButtonWithCallback(
+            onImageClick = onSendClick,
+            imageVector = Icons.AutoMirrored.Rounded.Send,
+            contentDescription = stringResource(id = R.string.back_button_content_description),
+            tint = if (enabled) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onTertiary,
+            enabled = enabled,
+            modifier = modifier
+        )
+    }
 }
 
 @Composable
