@@ -115,7 +115,6 @@ fun ConversationVertical(
                     Text("Error ${state.error}")  // TODO
 
                     MessageLazyColumn(
-                        innerPadding = innerPadding,
                         lazyPagingItems = lazyPagingItems,
                         loggedInUsername = loggedInUsername,
                         onImageClick = onImageClick
@@ -124,7 +123,6 @@ fun ConversationVertical(
 
                 is LoadState.NotLoading -> {
                     MessageLazyColumn(
-                        innerPadding = innerPadding,
                         lazyPagingItems = lazyPagingItems,
                         loggedInUsername = loggedInUsername,
                         onImageClick = onImageClick
@@ -140,7 +138,6 @@ fun ConversationVertical(
 
 @Composable
 private fun MessageLazyColumn(
-    innerPadding: PaddingValues,
     lazyPagingItems: LazyPagingItems<MessageEntity>,
     loggedInUsername: String,
     onImageClick: (String) -> Unit
@@ -148,7 +145,7 @@ private fun MessageLazyColumn(
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
-            .padding(innerPadding),
+            .padding(vertical = 8.dp),
     ) {
         items(count = lazyPagingItems.itemCount) { index ->
             val item = lazyPagingItems[index]
