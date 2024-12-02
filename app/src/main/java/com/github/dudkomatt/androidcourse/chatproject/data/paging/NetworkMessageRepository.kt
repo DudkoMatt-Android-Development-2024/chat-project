@@ -16,14 +16,6 @@ class NetworkMessagePagingRepository(
     private val retrofitMessageApi: MessageApi,
     private val userSessionRepository: UserSessionRepository
 ) {
-    suspend fun getFrom1ch(limit: Int, lastKnownId: Int): List<MessageModel> {
-        return retrofitMessageApi.getFrom1ch(
-            limit = limit,
-            lastKnownId = lastKnownId,
-            reverse = false
-        )
-    }
-
     suspend fun getFromChannel(
         limit: Int,
         channelName: String,
@@ -49,10 +41,6 @@ class NetworkMessagePagingRepository(
             lastKnownId = lastKnownId,
             reverse = false
         )
-    }
-
-    suspend fun postTo1ch(textMessage: TextMessageRequest): Int {
-        return retrofitMessageApi.postTo1ch(token = getToken(), textMessage = textMessage)
     }
 
     suspend fun postMessage(textMessage: TextMessageRequest): Int {

@@ -128,7 +128,10 @@ class ChatViewModel(
                 val registeredUsersAndChannels = infoApi.getUsers() + infoApi.getChannels()
                 chatDao.insertAll(registeredUsersAndChannels.map { ChatEntity(it) })
                 _uiState.value =
-                    _uiState.value.copy(isOffline = false, registeredUsersAndChannels = registeredUsersAndChannels)
+                    _uiState.value.copy(
+                        isOffline = false,
+                        registeredUsersAndChannels = registeredUsersAndChannels
+                    )
             } catch (e: Exception) {
                 Toast.makeText(
                     application.applicationContext,
