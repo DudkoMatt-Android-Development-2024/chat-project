@@ -1,11 +1,7 @@
 package com.github.dudkomatt.androidcourse.chatproject.data.paging
 
-import com.github.dudkomatt.androidcourse.chatproject.data.UserSessionRepository
-import com.github.dudkomatt.androidcourse.chatproject.exception.TokenMissingException
 import com.github.dudkomatt.androidcourse.chatproject.model.retrofit.response.MessageModel
-import com.github.dudkomatt.androidcourse.chatproject.model.retrofit.request.TextMessageRequest
 import com.github.dudkomatt.androidcourse.chatproject.network.MessageApi
-import okhttp3.RequestBody
 
 sealed interface MessageSource {
     data class Inbox(val username: String) : MessageSource
@@ -14,7 +10,7 @@ sealed interface MessageSource {
 
 class NetworkMessagePagingRepository(
     private val retrofitMessageApi: MessageApi,
-    private val userSessionRepository: UserSessionRepository
+    private val token: String,
 ) {
     suspend fun getFromChannel(
         limit: Int,
@@ -35,34 +31,13 @@ class NetworkMessagePagingRepository(
         lastKnownId: Int
     ): List<MessageModel> {
         return retrofitMessageApi.getUserInbox(
-            token = getToken(),
+            token = token,
             username = username,
             limit = limit,
             lastKnownId = lastKnownId,
             reverse = false
         )
     }
-
-    suspend fun postMessage(textMessage: TextMessageRequest): Int {
-        return retrofitMessageApi.postMessage(
-            token = getToken(),
-            textMessage = textMessage
-        )
-    }
-
-    suspend fun postMessage(
-        textMessage: TextMessageRequest,
-        image: RequestBody
-    ): Int {
-        return retrofitMessageApi.postMessage(
-            token = getToken(),
-            textMessage = textMessage,
-            image = image
-        )
-    }
-
-    private suspend fun getToken(): String =
-        userSessionRepository.getToken() ?: throw TokenMissingException()
 
     companion object {
         fun isEndOfPaginationReached(response: List<Any>, loadSize: Int): Boolean {

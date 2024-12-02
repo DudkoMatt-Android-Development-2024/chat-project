@@ -1,7 +1,9 @@
 package com.github.dudkomatt.androidcourse.chatproject.data.paging
 
+import android.util.Log
 import androidx.paging.ExperimentalPagingApi
 import androidx.paging.LoadType
+import androidx.paging.PagingConfig
 import androidx.paging.PagingState
 import androidx.paging.RemoteMediator
 import androidx.room.withTransaction
@@ -9,14 +11,34 @@ import com.github.dudkomatt.androidcourse.chatproject.data.paging.NetworkMessage
 import com.github.dudkomatt.androidcourse.chatproject.model.retrofit.response.toMessageEntity
 import com.github.dudkomatt.androidcourse.chatproject.model.room.MessageEntity
 import com.github.dudkomatt.androidcourse.chatproject.room.AppDatabase
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalPagingApi::class)
 class MessageRemoteMediator(
     private val messageSource: MessageSource?,
     private val database: AppDatabase,
     private val networkMessagePagingRepository: NetworkMessagePagingRepository,
+    private val viewModelRunScope: CoroutineScope,
+    private val refreshSharedFlow: SharedFlow<Unit>,
+    private val pagingConfig: PagingConfig
 ) : RemoteMediator<Int, MessageEntity>() {
     private val messageDao = database.messageDao()
+
+    init {
+        viewModelRunScope.launch {
+            refreshSharedFlow.onEach {
+                refresh()
+            }.collect()
+        }
+    }
+
+    private suspend fun refresh() {
+        load(LoadType.REFRESH, PagingState(pages = listOf(), anchorPosition = null, config = pagingConfig, 0))
+    }
 
     // https://developer.android.com/topic/libraries/architecture/paging/v3-network-db#item-keys
     override suspend fun load(
@@ -55,7 +77,7 @@ class MessageRemoteMediator(
                 is MessageSource.Inbox -> messageSource.username
             }
 
-            val pageSize = state.config.pageSize
+            val pageSize = pagingConfig.pageSize
 
             val response = when (messageSource) {
                 is MessageSource.ChannelOrUser -> networkMessagePagingRepository.getFromChannel(

@@ -6,7 +6,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class TextMessageRequest(
     val from: String,
-    val to: String? = null,
+    val to: String,
     val data: TextMessageInner,
 ) {
     @Serializable

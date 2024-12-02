@@ -9,6 +9,7 @@ import coil3.memory.MemoryCache
 import coil3.request.crossfade
 import com.github.dudkomatt.androidcourse.chatproject.config.RetrofitConfig
 import com.github.dudkomatt.androidcourse.chatproject.config.RoomConfigs
+import com.github.dudkomatt.androidcourse.chatproject.data.NetworkMessagePostRepository
 import com.github.dudkomatt.androidcourse.chatproject.data.UserSessionRepository
 import com.github.dudkomatt.androidcourse.chatproject.viewmodel.ChatViewModel
 import com.github.dudkomatt.androidcourse.chatproject.viewmodel.RootViewModel
@@ -35,6 +36,9 @@ class ChatApplication : Application() {
 
             // Room
             single { RoomConfigs.createRoomDb(androidContext()) }
+
+            // Repository
+            single { NetworkMessagePostRepository(get(), get(), get()) }
 
             // ViewModels
             viewModelOf(::RootViewModel)

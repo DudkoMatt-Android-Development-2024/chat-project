@@ -11,10 +11,11 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
+import com.github.dudkomatt.androidcourse.chatproject.data.NetworkMessagePostRepository
 import com.github.dudkomatt.androidcourse.chatproject.data.paging.NetworkMessagePagingRepository
 import com.github.dudkomatt.androidcourse.chatproject.data.paging.MessageSource
-import com.github.dudkomatt.androidcourse.chatproject.data.UserSessionRepository
 import com.github.dudkomatt.androidcourse.chatproject.data.paging.MessageRemoteMediator
+import com.github.dudkomatt.androidcourse.chatproject.model.retrofit.request.TextMessageRequest
 import com.github.dudkomatt.androidcourse.chatproject.model.room.ChatEntity
 import com.github.dudkomatt.androidcourse.chatproject.model.room.MessageEntity
 import com.github.dudkomatt.androidcourse.chatproject.network.InfoApi
@@ -22,21 +23,26 @@ import com.github.dudkomatt.androidcourse.chatproject.network.MessageApi
 import com.github.dudkomatt.androidcourse.chatproject.room.AppDatabase
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 
 sealed interface SelectedUiSubScreen {
-    data class Conversation(var selectedUsername: String) : SelectedUiSubScreen
+    data class Conversation(
+        var selectedUsername: String,
+
+    ) : SelectedUiSubScreen
     data object NewChat : SelectedUiSubScreen
 }
 
 data class ChatUiState(
     var isOffline: Boolean = false,
-    var selectedImageUrl: String? = null,
+    var fullscreenImageUrl: String? = null,
     var selectedUiSubScreen: SelectedUiSubScreen? = null,
     var registeredUsersAndChannels: List<String>? = null,
 )
@@ -44,17 +50,25 @@ data class ChatUiState(
 class ChatViewModel(
     private val application: Application,
     private val infoApi: InfoApi,
-    private val userSessionRepository: UserSessionRepository,
     private val retrofitMessageApi: MessageApi,
-    private val database: AppDatabase
+    private val database: AppDatabase,
+    private val rootViewModel: RootViewModel,
+    private val networkMessagePostRepository: NetworkMessagePostRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ChatUiState())
     val uiState: StateFlow<ChatUiState> = _uiState.asStateFlow()
 
+    private val _refreshConversationTrigger = MutableSharedFlow<Unit>()
+    private val refreshConversationTrigger = _refreshConversationTrigger.asSharedFlow()
+
     private val chatDao = database.chatDao()
 
     val chatListScrollState = LazyListState()
+
+    private val pagingConfig = PagingConfig(
+        pageSize = 20,
+    )
 
     @OptIn(ExperimentalCoroutinesApi::class, ExperimentalPagingApi::class)
     val pagingDataFlow: Flow<PagingData<MessageEntity>> = uiState.flatMapLatest { state ->
@@ -66,20 +80,22 @@ class ChatViewModel(
             else -> return@flatMapLatest flowOf()
         }
 
+        val token = rootViewModel.uiState.value.token ?: return@flatMapLatest flowOf()
         val networkMessagePagingRepository = NetworkMessagePagingRepository(
             retrofitMessageApi = retrofitMessageApi,
-            userSessionRepository = userSessionRepository
+            token = token,
         )
 
         Pager(
-            config = PagingConfig(
-                pageSize = 20,
-            ),
+            config = pagingConfig,
             initialKey = 0,
             remoteMediator = MessageRemoteMediator(
                 messageSource = messageSource,
                 database = database,
-                networkMessagePagingRepository = networkMessagePagingRepository
+                networkMessagePagingRepository = networkMessagePagingRepository,
+                pagingConfig = pagingConfig,
+                viewModelRunScope = viewModelScope,
+                refreshSharedFlow = refreshConversationTrigger,
             ),
             pagingSourceFactory = {
                 database.messageDao().getBy(messageSource.channelOrUser)
@@ -92,10 +108,8 @@ class ChatViewModel(
     }
 
     fun refreshConversation() {
-        // TODO - Not working
         viewModelScope.launch {
-            Log.d("TAG", "refreshConversation: invalidation")
-            _uiState.emit(_uiState.value.copy())
+            _refreshConversationTrigger.emit(Unit)
         }
     }
 
@@ -112,12 +126,37 @@ class ChatViewModel(
             _uiState.value.copy(selectedUiSubScreen = SelectedUiSubScreen.Conversation(username))
     }
 
+    fun sendTextOnlyMessage(text: String) {
+        val fromUsername = rootViewModel.uiState.value.username ?: return
+        val toUsername = when (val selectedUiSubScreen = _uiState.value.selectedUiSubScreen) {
+            is SelectedUiSubScreen.Conversation -> MessageSource.ChannelOrUser(
+                selectedUiSubScreen.selectedUsername
+            )
+
+            else -> return
+        }.channelOrUser
+
+        viewModelScope.launch {
+            networkMessagePostRepository.postMessage(
+                TextMessageRequest(
+                    from = fromUsername,
+                    to = toUsername,
+                    data = TextMessageRequest.TextMessageInner(
+                        text = TextMessageRequest.TextPayload(text),
+                        image = null
+                    )
+                ),
+            )
+            _refreshConversationTrigger.emit(Unit)
+        }
+    }
+
     fun showFullImage(imageUrl: String) {
-        _uiState.value = _uiState.value.copy(selectedImageUrl = imageUrl)
+        _uiState.value = _uiState.value.copy(fullscreenImageUrl = imageUrl)
     }
 
     fun resetFullScreenImage() {
-        _uiState.value = _uiState.value.copy(selectedImageUrl = null)
+        _uiState.value = _uiState.value.copy(fullscreenImageUrl = null)
     }
 
     fun refreshChatList() {

@@ -2,7 +2,6 @@ package com.github.dudkomatt.androidcourse.chatproject.ui.screen.chat
 
 import android.content.res.Configuration
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -12,7 +11,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.github.dudkomatt.androidcourse.chatproject.ui.screen.chat.horizontal.ChatScreenHorizontal
 import com.github.dudkomatt.androidcourse.chatproject.ui.screen.chat.vertical.ChatScreenVertical
 import com.github.dudkomatt.androidcourse.chatproject.viewmodel.ChatViewModel
-import kotlinx.serialization.json.Json.Default.configuration
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
@@ -23,7 +21,7 @@ fun ChatScreen(
     val chatViewModel: ChatViewModel = koinViewModel()
     val uiState by chatViewModel.uiState.collectAsState()
 
-    val selectedImageUrl = uiState.selectedImageUrl
+    val selectedImageUrl = uiState.fullscreenImageUrl
     if (selectedImageUrl != null) {
         FullImageScreen(
             selectedImageUrl = selectedImageUrl,
