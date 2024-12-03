@@ -1,6 +1,9 @@
 package com.github.dudkomatt.androidcourse.chatproject.ui.screen.chat.vertical
 
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -14,6 +17,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.Send
 import androidx.compose.material.icons.filled.AttachFile
+import androidx.compose.material.icons.filled.FilePresent
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
@@ -53,6 +57,7 @@ import com.github.dudkomatt.androidcourse.chatproject.ui.screen.component.ThumbP
 import com.github.dudkomatt.androidcourse.chatproject.ui.screen.component.TopAppBar
 import com.github.dudkomatt.androidcourse.chatproject.ui.screen.component.TopBarText
 import com.github.dudkomatt.androidcourse.chatproject.ui.screen.loading.LoadingScreen
+import com.github.dudkomatt.androidcourse.chatproject.viewmodel.AttachImageState
 import com.github.dudkomatt.androidcourse.chatproject.viewmodel.ChatViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -66,7 +71,6 @@ import org.koin.androidx.compose.koinViewModel
 fun ConversationVertical(
     selectedUsername: String,
     onBackClick: () -> Unit,
-    onAttachImageClick: () -> Unit,
     onSendClick: (String) -> Unit,
     onImageClick: (String) -> Unit,
     loggedInUsername: String,
@@ -92,7 +96,6 @@ fun ConversationVertical(
         },
         bottomBar = {
             ConversationBottomBar(
-                onAttachImageClick = onAttachImageClick,
                 onSendClick = onSendClick
             )
         }
@@ -270,7 +273,6 @@ fun MessageEntry(
 
 @Composable
 fun ConversationBottomBar(
-    onAttachImageClick: () -> Unit,
     onSendClick: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -288,7 +290,6 @@ fun ConversationBottomBar(
 
             AttachImageButton(
                 modifier = Modifier.padding(padding),
-                onAttachImageClick = onAttachImageClick
             )
 
             TextField(
@@ -315,12 +316,33 @@ fun ConversationBottomBar(
 
 @Composable
 fun AttachImageButton(
-    onAttachImageClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val chatViewModel: ChatViewModel = koinViewModel()
+    val imageAttachedState by chatViewModel.selectedImageStateFlow.collectAsState()
+
+    // https://developer.android.com/training/data-storage/shared/photopicker
+    val pickMedia = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
+        if (uri != null) {
+            chatViewModel.setSelectedImage(uri)
+        }
+    }
+
     IconButtonWithCallback(
-        onImageClick = onAttachImageClick,
-        imageVector = Icons.Default.AttachFile,
+        onImageClick = {
+            when (imageAttachedState) {
+                is AttachImageState.Image -> {
+                    chatViewModel.unsetSelectedImage()
+                }
+                AttachImageState.Nothing -> {
+                    pickMedia.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+                }
+            }
+        },
+        imageVector = when(imageAttachedState) {
+            is AttachImageState.Image -> Icons.Default.FilePresent
+            AttachImageState.Nothing -> Icons.Default.AttachFile
+        },
         contentDescription = stringResource(id = R.string.attach_iamge_button_content_description),
         tint = MaterialTheme.colorScheme.onSurface,
         modifier = modifier,
@@ -392,7 +414,6 @@ fun ConversationVerticalPreview() {
 
     ConversationVertical(
         onBackClick = {},
-        onAttachImageClick = {},
         chatMessagesFlow = MutableStateFlow(PagingData.from(messages)),
         onSendClick = {},
         loggedInUsername = CURRENT_USERNAME,

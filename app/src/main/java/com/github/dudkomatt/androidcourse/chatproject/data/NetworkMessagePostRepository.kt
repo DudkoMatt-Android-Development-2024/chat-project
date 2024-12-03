@@ -7,7 +7,7 @@ import com.github.dudkomatt.androidcourse.chatproject.model.retrofit.request.Tex
 import com.github.dudkomatt.androidcourse.chatproject.model.room.MessageEntity
 import com.github.dudkomatt.androidcourse.chatproject.network.MessageApi
 import com.github.dudkomatt.androidcourse.chatproject.room.AppDatabase
-import okhttp3.RequestBody
+import okhttp3.MultipartBody
 
 class NetworkMessagePostRepository(
     private val application: Application,
@@ -34,7 +34,7 @@ class NetworkMessagePostRepository(
                         from = textMessage.from,
                         to = textMessage.to,
                         imageUrl = null,
-                        text = textMessage.data.text?.text,
+                        text = textMessage.data?.text?.text,
                         time = System.currentTimeMillis()
                     )
                 )
@@ -46,7 +46,7 @@ class NetworkMessagePostRepository(
 
     suspend fun postMessage(
         textMessage: TextMessageRequest,
-        image: RequestBody,
+        image: MultipartBody.Part,
     ): Int? {
         val token = dataStorePreferencesRepository.getToken() ?: return null
         val response = retrofitMessageApi.postMessage(
@@ -63,7 +63,7 @@ class NetworkMessagePostRepository(
                         from = textMessage.from,
                         to = textMessage.to,
                         imageUrl = null,
-                        text = textMessage.data.text?.text + application.applicationContext.getString(R.string.this_message_contains_an_image_refresh_chat_to_view_it),
+                        text = textMessage.data?.text?.text + application.applicationContext.getString(R.string.this_message_contains_an_image_refresh_chat_to_view_it),
                         time = System.currentTimeMillis()
                     )
                 )

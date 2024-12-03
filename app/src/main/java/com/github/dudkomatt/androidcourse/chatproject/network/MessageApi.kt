@@ -1,9 +1,9 @@
 package com.github.dudkomatt.androidcourse.chatproject.network
 
 import com.github.dudkomatt.androidcourse.chatproject.config.RetrofitConfig
-import com.github.dudkomatt.androidcourse.chatproject.model.retrofit.response.MessageModel
 import com.github.dudkomatt.androidcourse.chatproject.model.retrofit.request.TextMessageRequest
-import okhttp3.RequestBody
+import com.github.dudkomatt.androidcourse.chatproject.model.retrofit.response.MessageModel
+import okhttp3.MultipartBody
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.Header
@@ -36,13 +36,11 @@ interface MessageApi {
     @POST("/messages")
     suspend fun postMessage(@Header(RetrofitConfig.X_AUTH_TOKEN_HEADER) token: String, @Body textMessage: TextMessageRequest): Int
 
-    // TODO - check msg / Content-Type=multipart/form-data
     @Multipart
     @POST("/1ch")
-    suspend fun postTo1ch(@Header(RetrofitConfig.X_AUTH_TOKEN_HEADER) token: String, @Part("msg") textMessage: TextMessageRequest, @Part("picture") image: RequestBody): Int
+    suspend fun postTo1ch(@Header(RetrofitConfig.X_AUTH_TOKEN_HEADER) token: String, @Part("msg") textMessage: TextMessageRequest, @Part image: MultipartBody.Part): Int
 
-    // TODO - check msg / Content-Type=multipart/form-data
     @Multipart
     @POST("/messages")
-    suspend fun postMessage(@Header(RetrofitConfig.X_AUTH_TOKEN_HEADER) token: String, @Part("msg") textMessage: TextMessageRequest, @Part("picture") image: RequestBody): Int
+    suspend fun postMessage(@Header(RetrofitConfig.X_AUTH_TOKEN_HEADER) token: String, @Part("msg") textMessage: TextMessageRequest, @Part image: MultipartBody.Part): Int
 }

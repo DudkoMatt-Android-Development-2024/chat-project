@@ -55,7 +55,6 @@ fun ChatScreenHorizontal(
                 ConversationVertical(
                     selectedUsername = subScreen.selectedUsername,
                     onBackClick = chatViewModel::unsetSubScreen,
-                    onAttachImageClick = {},  // TODO - Attach images
                     onSendClick = chatViewModel::sendMessage,
                     loggedInUsername = username,
                     chatMessagesFlow = subScreen.pagingDataFlow,

@@ -35,4 +35,5 @@
     <string name="registration_success_response">Registration success. Response: %1$s</string>
     <string name="registration_failed_error">Registration failed. Error: %1$s</string>
     <string name="theme_changed_to">Theme changed to: %1$s</string>
+    <string name="not_implemented_due_to_411_length_required_error">Not implemented due to 411 Length Required error</string>
 </resources>

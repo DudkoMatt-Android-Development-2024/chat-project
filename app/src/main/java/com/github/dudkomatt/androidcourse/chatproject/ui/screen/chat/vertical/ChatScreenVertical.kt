@@ -2,12 +2,12 @@ package com.github.dudkomatt.androidcourse.chatproject.ui.screen.chat.vertical
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
-import androidx.compose.ui.Modifier
-import com.github.dudkomatt.androidcourse.chatproject.viewmodel.ChatViewModel
-import org.koin.androidx.compose.koinViewModel
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
 import com.github.dudkomatt.androidcourse.chatproject.ui.screen.chat.NewChatScreen
+import com.github.dudkomatt.androidcourse.chatproject.viewmodel.ChatViewModel
 import com.github.dudkomatt.androidcourse.chatproject.viewmodel.SelectedUiSubScreen
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun ChatScreenVertical(
@@ -23,7 +23,6 @@ fun ChatScreenVertical(
             ConversationVertical(
                 selectedUsername = subScreen.selectedUsername,
                 onBackClick = chatViewModel::unsetSubScreen,
-                onAttachImageClick = {},  // TODO - Attach images
                 onSendClick = chatViewModel::sendMessage,
                 loggedInUsername = username,
                 chatMessagesFlow = subScreen.pagingDataFlow,

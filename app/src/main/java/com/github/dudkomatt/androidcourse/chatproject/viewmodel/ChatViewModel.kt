@@ -1,6 +1,7 @@
 package com.github.dudkomatt.androidcourse.chatproject.viewmodel
 
 import android.app.Application
+import android.net.Uri
 import android.widget.Toast
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.lifecycle.ViewModel
@@ -41,6 +42,11 @@ sealed interface SelectedUiSubScreen {
     data object NewChat : SelectedUiSubScreen
 }
 
+sealed interface AttachImageState {
+    data object Nothing : AttachImageState
+    data class Image(val uri: Uri) : AttachImageState
+}
+
 data class InboxOrChannelEntry(
     val from: String,
     val isInbox: Boolean
@@ -71,6 +77,10 @@ class ChatViewModel(
 
     private val _mediatorStateFlow = MutableStateFlow<MediatorState>(MediatorState.Loading)
     val mediatorStateFlow = _mediatorStateFlow.asStateFlow()
+
+    private val _selectedImageStateFlow =
+        MutableStateFlow<AttachImageState>(AttachImageState.Nothing)
+    val selectedImageStateFlow = _selectedImageStateFlow.asStateFlow()
 
     private val inboxDao = database.inboxDao()
     private val messageDao = database.messageDao()
@@ -157,7 +167,7 @@ class ChatViewModel(
 
     fun sendMessage(text: String) {
         viewModelScope.launch {
-            val fromUsername = dataStorePreferencesRepository.getToken() ?: return@launch
+            val fromUsername = dataStorePreferencesRepository.getUsername() ?: return@launch
             val toUsername = when (val selectedUiSubScreen = _uiState.value.selectedUiSubScreen) {
                 is SelectedUiSubScreen.Conversation -> MessageSource.ChannelOrUser(
                     selectedUiSubScreen.selectedUsername
@@ -166,18 +176,62 @@ class ChatViewModel(
                 else -> return@launch
             }.channelOrUser
 
-            networkMessagePostRepository.postMessage(
-                TextMessageRequest(
-                    from = fromUsername,
-                    to = toUsername,
-                    data = TextMessageRequest.TextMessageInner(
-                        text = TextMessageRequest.TextPayload(text),
-                        image = null
-                    )
-                ),
-            )
+            val imageUri: Uri? = when (val imageSelectionState = _selectedImageStateFlow.value) {
+                is AttachImageState.Image -> imageSelectionState.uri
+                AttachImageState.Nothing -> null
+            }
+
+            if (imageUri == null) {
+                networkMessagePostRepository.postMessage(
+                    TextMessageRequest(
+                        from = fromUsername,
+                        to = toUsername,
+                        data = TextMessageRequest.TextMessageInner(
+                            text = TextMessageRequest.TextPayload(text),
+                            image = null
+                        )
+                    ),
+                )
+            } else {
+                Toast.makeText(
+                    application.applicationContext,
+                    application.applicationContext.getString(R.string.not_implemented_due_to_411_length_required_error),
+                    Toast.LENGTH_SHORT
+                ).show()
+
+//                application.applicationContext.contentResolver.openInputStream(imageUri).use { inputStream ->
+//                    if (inputStream == null) return@launch
+//
+//                    val byteArrayOutputStream = ByteArrayOutputStream()
+//                    val bitmap = MediaStore.Images.Media.getBitmap(application.applicationContext.contentResolver, imageUri)
+//
+//                    bitmap.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream)
+//                    val byteArray = byteArrayOutputStream.toByteArray()
+//
+//                    networkMessagePostRepository.postMessage(
+//                        textMessage = TextMessageRequest(
+//                            from = fromUsername,
+//                            to = toUsername,
+//                            data = null
+//                        ),
+//                        image = MultipartBody.Part.createFormData(
+//                            "picture",
+//                            null,
+//                            byteArray.toRequestBody(contentType = "image/png".toMediaType())
+//                        )
+//                    )
+//                }
+            }
         }
 
+    }
+
+    fun setSelectedImage(uri: Uri) {
+        _selectedImageStateFlow.value = AttachImageState.Image(uri)
+    }
+
+    fun unsetSelectedImage() {
+        _selectedImageStateFlow.value = AttachImageState.Nothing
     }
 
     fun showFullImage(imageUrl: String) {
