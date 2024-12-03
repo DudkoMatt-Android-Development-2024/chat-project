@@ -4,7 +4,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.github.dudkomatt.androidcourse.chatproject.config.LogConfig
-import com.github.dudkomatt.androidcourse.chatproject.data.UserSessionRepository
+import com.github.dudkomatt.androidcourse.chatproject.data.DataStorePreferencesRepository
 import com.github.dudkomatt.androidcourse.chatproject.network.AuthApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -22,7 +22,7 @@ data class RootUIState(
 }
 
 class RootViewModel(
-    private val userSessionRepository: UserSessionRepository,
+    private val dataStorePreferencesRepository: DataStorePreferencesRepository,
     private val authApi: AuthApi
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(RootUIState())
@@ -36,8 +36,8 @@ class RootViewModel(
         viewModelScope.launch {
             _uiState.value =
                 _uiState.value.copy(
-                    username = userSessionRepository.getUsername(),
-                    token = userSessionRepository.getToken(),
+                    username = dataStorePreferencesRepository.getUsername(),
+                    token = dataStorePreferencesRepository.getToken(),
                     isLoading = false
                 )
         }
@@ -58,7 +58,7 @@ class RootViewModel(
                 }
             }
 
-            userSessionRepository.removeUserInfo()
+            dataStorePreferencesRepository.removeUserInfo()
             _uiState.value = RootUIState()
             retrieveUsernameAndToken()
         }

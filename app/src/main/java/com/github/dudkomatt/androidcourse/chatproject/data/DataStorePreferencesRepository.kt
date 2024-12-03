@@ -8,7 +8,13 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.firstOrNull
 
-class UserSessionRepository(
+sealed interface ThemeState {
+    data object SystemDefault : ThemeState
+    data object Dark : ThemeState
+    data object Light : ThemeState
+}
+
+class DataStorePreferencesRepository(
     private val context: Context
 ) {
     private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = DATA_STORE_NAME)
@@ -37,9 +43,29 @@ class UserSessionRepository(
         return preferences?.get(stringPreferencesKey(USERNAME_KEY))
     }
 
+    suspend fun storeTheme(theme: ThemeState) {
+        context.dataStore.edit { preferences ->
+            when (theme) {
+                ThemeState.Dark -> preferences[stringPreferencesKey(THEME_KEY)] = "Dark"
+                ThemeState.Light -> preferences[stringPreferencesKey(THEME_KEY)] = "Light"
+                ThemeState.SystemDefault -> preferences.remove(stringPreferencesKey(THEME_KEY))
+            }
+        }
+    }
+
+    suspend fun getTheme(): ThemeState {
+        val preferences = context.dataStore.data.firstOrNull()
+        return when (preferences?.get(stringPreferencesKey(THEME_KEY))) {
+            "Dark" -> ThemeState.Dark
+            "Light" -> ThemeState.Light
+            else -> ThemeState.SystemDefault
+        }
+    }
+
     companion object {
         private const val DATA_STORE_NAME = "session_token"
         private const val TOKEN_KEY = "token"
         private const val USERNAME_KEY = "username"
+        private const val THEME_KEY = "theme"
     }
 }

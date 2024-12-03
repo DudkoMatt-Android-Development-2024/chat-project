@@ -11,7 +11,7 @@ import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import com.github.dudkomatt.androidcourse.chatproject.data.NetworkMessagePostRepository
-import com.github.dudkomatt.androidcourse.chatproject.data.UserSessionRepository
+import com.github.dudkomatt.androidcourse.chatproject.data.DataStorePreferencesRepository
 import com.github.dudkomatt.androidcourse.chatproject.data.paging.MediatorState
 import com.github.dudkomatt.androidcourse.chatproject.data.paging.NetworkMessageRepository
 import com.github.dudkomatt.androidcourse.chatproject.data.paging.MessageSource
@@ -57,7 +57,7 @@ class ChatViewModel(
     private val infoApi: InfoApi,
     private val retrofitMessageApi: MessageApi,
     private val database: AppDatabase,
-    private val userSessionRepository: UserSessionRepository,
+    private val dataStorePreferencesRepository: DataStorePreferencesRepository,
     private val networkMessagePostRepository: NetworkMessagePostRepository
 ) : ViewModel() {
 
@@ -109,8 +109,8 @@ class ChatViewModel(
     @OptIn(ExperimentalPagingApi::class)
     fun setSelectedChatEntry(selectedEntry: InboxOrChannelEntry) {
         viewModelScope.launch {
-            val token = userSessionRepository.getToken()
-            val username = userSessionRepository.getUsername()
+            val token = dataStorePreferencesRepository.getToken()
+            val username = dataStorePreferencesRepository.getUsername()
 
 
             if (token == null) return@launch
@@ -156,7 +156,7 @@ class ChatViewModel(
 
     fun sendMessage(text: String) {
         viewModelScope.launch {
-            val fromUsername = userSessionRepository.getToken() ?: return@launch
+            val fromUsername = dataStorePreferencesRepository.getToken() ?: return@launch
             val toUsername = when (val selectedUiSubScreen = _uiState.value.selectedUiSubScreen) {
                 is SelectedUiSubScreen.Conversation -> MessageSource.ChannelOrUser(
                     selectedUiSubScreen.selectedUsername
@@ -190,7 +190,7 @@ class ChatViewModel(
     fun refresh() {
         viewModelScope.launch {
             try {
-                if (userSessionRepository.getUsername() == null || userSessionRepository.getToken() == null) {
+                if (dataStorePreferencesRepository.getUsername() == null || dataStorePreferencesRepository.getToken() == null) {
                     return@launch
                 }
 
@@ -208,7 +208,7 @@ class ChatViewModel(
                     channels.map { ChatEntity(from = it, isChannel = true) })
 
                 // Get /inbox
-                val username = userSessionRepository.getUsername()
+                val username = dataStorePreferencesRepository.getUsername()
                 var inboxUsers: List<String> = listOf()
                 if (username != null) {
                     val inboxMessages = getInbox(username)
@@ -253,7 +253,7 @@ class ChatViewModel(
         var lastKnownId = 0
         val resultMessages: MutableList<MessageModel> = mutableListOf()
 
-        val token = userSessionRepository.getToken() ?: return listOf()
+        val token = dataStorePreferencesRepository.getToken() ?: return listOf()
         val networkMessageRepository = NetworkMessageRepository(
             retrofitMessageApi = retrofitMessageApi,
             token = token,

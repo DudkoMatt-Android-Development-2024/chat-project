@@ -10,7 +10,7 @@ import coil3.request.crossfade
 import com.github.dudkomatt.androidcourse.chatproject.config.RetrofitConfig
 import com.github.dudkomatt.androidcourse.chatproject.config.RoomConfigs
 import com.github.dudkomatt.androidcourse.chatproject.data.NetworkMessagePostRepository
-import com.github.dudkomatt.androidcourse.chatproject.data.UserSessionRepository
+import com.github.dudkomatt.androidcourse.chatproject.data.DataStorePreferencesRepository
 import com.github.dudkomatt.androidcourse.chatproject.viewmodel.ChatViewModel
 import com.github.dudkomatt.androidcourse.chatproject.viewmodel.RootViewModel
 import com.github.dudkomatt.androidcourse.chatproject.viewmodel.LoginViewModel
@@ -27,7 +27,7 @@ class ChatApplication : Application() {
 
         val viewModelModule = module {
             // Session token storage
-            single { UserSessionRepository(androidContext()) }
+            single { DataStorePreferencesRepository(androidContext()) }
 
             // Retrofit
             single { RetrofitConfig.authRetrofitApi }

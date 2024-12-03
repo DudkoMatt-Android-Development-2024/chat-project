@@ -20,8 +20,10 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            ChatProjectTheme {
-                KoinContext {
+            KoinContext {
+                ChatProjectTheme(
+                    darkTheme = true
+                ) {
                     ChatApp()
                 }
             }

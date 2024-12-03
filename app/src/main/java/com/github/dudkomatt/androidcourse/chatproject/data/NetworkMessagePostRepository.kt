@@ -9,7 +9,7 @@ import okhttp3.RequestBody
 
 class NetworkMessagePostRepository(
     private val retrofitMessageApi: MessageApi,
-    private val userSessionRepository: UserSessionRepository,
+    private val dataStorePreferencesRepository: DataStorePreferencesRepository,
     private val database: AppDatabase
 ) {
     private val messageDao = database.messageDao()
@@ -17,7 +17,7 @@ class NetworkMessagePostRepository(
     suspend fun postMessage(
         textMessage: TextMessageRequest,
     ): Int? {
-        val token = userSessionRepository.getToken() ?: return null
+        val token = dataStorePreferencesRepository.getToken() ?: return null
         val response = retrofitMessageApi.postMessage(
             token = token,
             textMessage = textMessage
@@ -45,7 +45,7 @@ class NetworkMessagePostRepository(
         textMessage: TextMessageRequest,
         image: RequestBody,
     ): Int? {
-        val token = userSessionRepository.getToken() ?: return null
+        val token = dataStorePreferencesRepository.getToken() ?: return null
         val response = retrofitMessageApi.postMessage(
             token = token,
             textMessage = textMessage,
