@@ -12,6 +12,13 @@ import com.github.dudkomatt.androidcourse.chatproject.data.paging.NetworkMessage
 import com.github.dudkomatt.androidcourse.chatproject.model.retrofit.response.toMessageEntity
 import com.github.dudkomatt.androidcourse.chatproject.model.room.MessageEntity
 import com.github.dudkomatt.androidcourse.chatproject.room.AppDatabase
+import kotlinx.coroutines.flow.MutableStateFlow
+
+sealed interface MediatorState {
+    data object Loading : MediatorState
+    data object Error : MediatorState
+    data object Done : MediatorState
+}
 
 @OptIn(ExperimentalPagingApi::class)
 class MessageRemoteMediator(
@@ -19,6 +26,7 @@ class MessageRemoteMediator(
     private val messageSource: MessageSource?,
     private val database: AppDatabase,
     private val networkMessageRepository: NetworkMessageRepository,
+    private val mediatorStateFlow: MutableStateFlow<MediatorState>
 ) : RemoteMediator<Int, MessageEntity>() {
     private val messageDao = database.messageDao()
 
@@ -37,16 +45,19 @@ class MessageRemoteMediator(
             val lastKnownId: Int? = when (loadType) {
                 LoadType.REFRESH -> {
 //                    Log.d("TAG", "load: REFRESH")
+                    mediatorStateFlow.emit(MediatorState.Loading)
                     null
                 }
 
                 LoadType.PREPEND -> {
 //                    Log.d("TAG", "load: PREPEND")
+                    mediatorStateFlow.emit(MediatorState.Done)
                     return MediatorResult.Success(endOfPaginationReached = true)
                 }
 
                 LoadType.APPEND -> {
 //                    Log.d("TAG", "load: APPEND")
+                    mediatorStateFlow.emit(MediatorState.Loading)
 
                     val toUsernameOrChannel = when (messageSource) {
                         is MessageSource.ChannelOrUser -> messageSource.channelOrUser
@@ -128,6 +139,10 @@ class MessageRemoteMediator(
             val endOfPaginationReached = isEndOfPaginationReached(
                 response = response
             )
+
+            if (endOfPaginationReached) {
+                mediatorStateFlow.emit(MediatorState.Done)
+            }
             MediatorResult.Success(
                 endOfPaginationReached = endOfPaginationReached
             )
@@ -138,6 +153,7 @@ class MessageRemoteMediator(
                 "MediatorResult.Error. Error: ${e.message}",
                 Toast.LENGTH_SHORT
             ).show()
+            mediatorStateFlow.emit(MediatorState.Error)
             MediatorResult.Error(e)
         }
     }

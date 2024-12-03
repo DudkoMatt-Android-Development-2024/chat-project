@@ -20,6 +20,7 @@ import androidx.compose.material.icons.automirrored.rounded.Send
 import androidx.compose.material.icons.automirrored.sharp.Send
 import androidx.compose.material.icons.filled.AttachFile
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -29,6 +30,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -46,6 +48,7 @@ import androidx.paging.LoadState
 import androidx.paging.PagingData
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
+import com.github.dudkomatt.androidcourse.chatproject.data.paging.MediatorState
 import com.github.dudkomatt.androidcourse.chatproject.model.room.MessageEntity
 import com.github.dudkomatt.androidcourse.chatproject.ui.screen.chat.vertical.PreviewData.CURRENT_USERNAME
 import com.github.dudkomatt.androidcourse.chatproject.ui.screen.chat.vertical.PreviewData.getIncomingMessage
@@ -57,11 +60,13 @@ import com.github.dudkomatt.androidcourse.chatproject.ui.screen.component.Offlin
 import com.github.dudkomatt.androidcourse.chatproject.ui.screen.component.ReturnBackTopBarButton
 import com.github.dudkomatt.androidcourse.chatproject.ui.screen.component.TopBarText
 import com.github.dudkomatt.androidcourse.chatproject.ui.screen.loading.LoadingScreen
+import com.github.dudkomatt.androidcourse.chatproject.viewmodel.ChatViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toInstant
+import org.koin.androidx.compose.koinViewModel
 
 
 @Composable
@@ -212,15 +217,30 @@ fun ConversationTopBar(
 
 @Composable
 fun RefreshButton(modifier: Modifier = Modifier, onRefreshClick: () -> Unit) {
-    IconButton(
-        modifier = modifier,
-        onClick = onRefreshClick
-    ) {
-        Icon(
-            imageVector = Icons.Default.Refresh,
-            contentDescription = stringResource(R.string.refresh_button),
-            tint = MaterialTheme.colorScheme.onSurface
-        )
+    val chatViewModel: ChatViewModel = koinViewModel()
+    val mediatorState by chatViewModel.mediatorStateFlow.collectAsState()
+
+    when (mediatorState) {
+        MediatorState.Loading -> {
+            CircularProgressIndicator(
+                modifier = modifier.clickable {
+                    onRefreshClick()
+                },
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+        }
+        else -> {
+            IconButton(
+                modifier = modifier,
+                onClick = onRefreshClick
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Refresh,
+                    contentDescription = stringResource(R.string.refresh_button),
+                    tint = MaterialTheme.colorScheme.onSurface
+                )
+            }
+        }
     }
 }
 

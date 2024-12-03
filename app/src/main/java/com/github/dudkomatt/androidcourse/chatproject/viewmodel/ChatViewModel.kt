@@ -11,6 +11,7 @@ import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import com.github.dudkomatt.androidcourse.chatproject.data.NetworkMessagePostRepository
+import com.github.dudkomatt.androidcourse.chatproject.data.paging.MediatorState
 import com.github.dudkomatt.androidcourse.chatproject.data.paging.NetworkMessageRepository
 import com.github.dudkomatt.androidcourse.chatproject.data.paging.MessageSource
 import com.github.dudkomatt.androidcourse.chatproject.data.paging.MessageRemoteMediator
@@ -23,6 +24,7 @@ import com.github.dudkomatt.androidcourse.chatproject.room.AppDatabase
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
@@ -52,6 +54,9 @@ class ChatViewModel(
 
     private val _uiState = MutableStateFlow(ChatUiState())
     val uiState: StateFlow<ChatUiState> = _uiState.asStateFlow()
+
+    private val _mediatorStateFlow = MutableStateFlow<MediatorState>(MediatorState.Loading)
+    val mediatorStateFlow = _mediatorStateFlow.asStateFlow()
 
     private val chatDao = database.chatDao()
 
@@ -93,6 +98,7 @@ class ChatViewModel(
                         messageSource = messageSource,
                         database = database,
                         networkMessageRepository = networkMessageRepository,
+                        mediatorStateFlow = _mediatorStateFlow
                     ),
                     pagingSourceFactory = {
                         database.messageDao().getBy(messageSource.channelOrUser)
