@@ -21,19 +21,19 @@ import com.github.dudkomatt.androidcourse.chatproject.ui.screen.component.Return
 import com.github.dudkomatt.androidcourse.chatproject.ui.screen.component.TopAppBar
 import com.github.dudkomatt.androidcourse.chatproject.ui.screen.component.TopBarText
 import androidx.compose.material3.Button
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import com.github.dudkomatt.androidcourse.chatproject.ui.screen.component.ChatTitle
-import com.github.dudkomatt.androidcourse.chatproject.ui.screen.component.ThumbProfileClickableImage
 
 @Composable
 fun NewChatScreen(
     onBackClick: () -> Unit,
-    onNewChatClick: () -> Unit,
+    onNewChatClick: (String, Boolean) -> Unit,
     modifier: Modifier = Modifier
 ) {
     BackHandler {
@@ -50,13 +50,14 @@ fun NewChatScreen(
         }
     ) { innerPadding ->
 
-        Column (
+        Column(
             modifier = Modifier
                 .padding(innerPadding)
                 .fillMaxWidth(),
             horizontalAlignment = Alignment.Start
         ) {
-            var chatName by rememberSaveable { mutableStateOf("") }
+            var chatName by remember { mutableStateOf("") }
+            var isChannelCheckbox by remember { mutableStateOf(false) }
 
             TextField(
                 modifier = Modifier
@@ -68,12 +69,25 @@ fun NewChatScreen(
                 label = { Text(stringResource(R.string.channel_name_or_username)) }
             )
 
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Start
+            ) {
+                Checkbox(
+                    checked = isChannelCheckbox,
+                    onCheckedChange = { isChannelCheckbox = it }
+                )
+                Text(
+                    text = stringResource(R.string.is_channel)
+                )
+            }
+
             Button(
                 modifier = Modifier.padding(8.dp),
                 content = {
-                    Text("Create a new channel or text to a new person")
+                    Text(stringResource(R.string.create_a_new_channel_or_text_to_a_new_person))
                 },
-                onClick = onNewChatClick
+                onClick = { onNewChatClick(chatName, isChannelCheckbox) }
             )
         }
 
@@ -98,7 +112,7 @@ fun NewChatTopBar(
                 onBackClick = onBackClick
             )
             TopBarText(
-                text = stringResource(R.string.new_channel_screen_title)
+                text = stringResource(R.string.new_char_or_channel_screen_title)
             )
         }
     }
@@ -109,6 +123,6 @@ fun NewChatTopBar(
 fun NewChatScreenPreview() {
     NewChatScreen(
         onBackClick = {},
-        onNewChatClick = {}
+        onNewChatClick = { _, _ -> }
     )
 }

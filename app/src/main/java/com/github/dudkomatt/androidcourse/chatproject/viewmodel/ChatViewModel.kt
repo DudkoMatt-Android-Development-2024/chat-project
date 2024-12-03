@@ -60,6 +60,10 @@ class ChatViewModel(
     private val networkMessagePostRepository: NetworkMessagePostRepository
 ) : ViewModel() {
 
+    companion object {
+        const val CHANNEL_POSTFIX = "@channel"
+    }
+
     private val _uiState = MutableStateFlow(ChatUiState())
     val uiState: StateFlow<ChatUiState> = _uiState.asStateFlow()
 
@@ -86,6 +90,15 @@ class ChatViewModel(
 
     fun unsetSubScreen() {
         _uiState.value = _uiState.value.copy(selectedUiSubScreen = null)
+    }
+
+    fun setSelectedChatEntry(channelOrUsername: String, isChannel: Boolean) {
+        setSelectedChatEntry(
+            InboxOrChannelEntry(
+                from = if (isChannel) channelOrUsername + CHANNEL_POSTFIX else channelOrUsername,
+                isInbox = !isChannel
+            )
+        )
     }
 
     @OptIn(ExperimentalPagingApi::class)
@@ -117,7 +130,10 @@ class ChatViewModel(
                     ),
                     pagingSourceFactory = {
                         if (selectedEntry.isInbox) {
-                            database.messageDao().getByInbox(myUsername = username, anotherUsername = selectedEntry.from)
+                            database.messageDao().getByInbox(
+                                myUsername = username,
+                                anotherUsername = selectedEntry.from
+                            )
                         } else {
                             database.messageDao().getBy(channelOrUsername = selectedEntry.from)
                         }

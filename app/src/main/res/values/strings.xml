@@ -17,10 +17,12 @@
     <string name="loading_message">Loading…</string>
     <string name="log_out_button">Log out button</string>
     <string name="refresh_floating_action_button_description">Refresh</string>
-    <string name="new_channel_screen_title">New Channel</string>
+    <string name="new_char_or_channel_screen_title">New Chat or Channel</string>
     <string name="channel_name_or_username">Channel name or username…</string>
     <string name="open_or_start_a_new_chat_to_see_messages">Open or start a new chat to see messages…</string>
     <string name="offline">Offline</string>
     <string name="refresh_button">Refresh</string>
     <string name="inbox_messages">Inbox messages</string>
+    <string name="is_channel">Is channel?</string>
+    <string name="create_a_new_channel_or_text_to_a_new_person">Create a new channel or text to a new person</string>
 </resources>

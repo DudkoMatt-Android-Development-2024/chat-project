@@ -65,7 +65,7 @@ fun ChatScreenHorizontal(
             SelectedUiSubScreen.NewChat -> {
                 NewChatScreen(
                     onBackClick = chatViewModel::unsetSubScreen,
-                    onNewChatClick = {},
+                    onNewChatClick = chatViewModel::setSelectedChatEntry,
                     modifier = modifier
                 )
             }
