@@ -1,14 +1,11 @@
 package com.github.dudkomatt.androidcourse.chatproject.data
 
-import android.util.Log
 import androidx.room.withTransaction
 import com.github.dudkomatt.androidcourse.chatproject.model.retrofit.request.TextMessageRequest
 import com.github.dudkomatt.androidcourse.chatproject.model.room.MessageEntity
 import com.github.dudkomatt.androidcourse.chatproject.network.MessageApi
 import com.github.dudkomatt.androidcourse.chatproject.room.AppDatabase
 import com.github.dudkomatt.androidcourse.chatproject.viewmodel.RootViewModel
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import okhttp3.RequestBody
 
 class NetworkMessagePostRepository(

@@ -43,7 +43,7 @@ fun ChatScreenHorizontal(
             onRefreshClick = chatViewModel::refresh,
             onCreateNewChatClick = chatViewModel::setIsNewChatScreen,
             inboxUsersAndChannels = uiState.inboxUsersAndRegisteredChannels,
-            onChatClick = chatViewModel::setSelectedUsername,
+            onChatClick = chatViewModel::setSelectedChatEntry,
             modifier = modifier
                 .widthIn(min = 0.dp, max = 1000.dp)
                 .fillMaxWidth(.35f),

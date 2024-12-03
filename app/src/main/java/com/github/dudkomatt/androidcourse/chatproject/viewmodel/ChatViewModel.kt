@@ -39,11 +39,16 @@ sealed interface SelectedUiSubScreen {
     data object NewChat : SelectedUiSubScreen
 }
 
+data class InboxOrChannelEntry(
+    val from: String,
+    val isInbox: Boolean
+)
+
 data class ChatUiState(
     var isOffline: Boolean = false,
     var fullscreenImageUrl: String? = null,
     var selectedUiSubScreen: SelectedUiSubScreen? = null,
-    var inboxUsersAndRegisteredChannels: List<String>? = null,
+    var inboxUsersAndRegisteredChannels: List<InboxOrChannelEntry>? = null,
 )
 
 class ChatViewModel(
@@ -84,18 +89,23 @@ class ChatViewModel(
     }
 
     @OptIn(ExperimentalPagingApi::class)
-    fun setSelectedUsername(username: String) {
+    fun setSelectedChatEntry(selectedEntry: InboxOrChannelEntry) {
         val token = rootViewModel.uiState.value.token ?: return
+        val username = rootViewModel.uiState.value.username ?: return
         val networkMessageRepository = NetworkMessageRepository(
             retrofitMessageApi = retrofitMessageApi,
             token = token,
         )
-        val messageSource = MessageSource.ChannelOrUser(username)
+
+        val messageSource = if (selectedEntry.isInbox) MessageSource.Inbox(
+            myUsername = username,
+            anotherUsername = selectedEntry.from
+        ) else MessageSource.ChannelOrUser(selectedEntry.from)
 
         _uiState.value =
             _uiState.value.copy(selectedUiSubScreen = SelectedUiSubScreen.Conversation(
-                username,
-                Pager(
+                selectedUsername = selectedEntry.from,
+                pagingDataFlow = Pager(
                     config = pagingConfig,
                     initialKey = 0,
                     remoteMediator = MessageRemoteMediator(
@@ -106,7 +116,11 @@ class ChatViewModel(
                         mediatorStateFlow = _mediatorStateFlow
                     ),
                     pagingSourceFactory = {
-                        database.messageDao().getBy(messageSource.channelOrUser)
+                        if (selectedEntry.isInbox) {
+                            database.messageDao().getByInbox(myUsername = username, anotherUsername = selectedEntry.from)
+                        } else {
+                            database.messageDao().getBy(channelOrUsername = selectedEntry.from)
+                        }
                     }
                 ).flow.cachedIn(viewModelScope)
             ))
@@ -175,7 +189,11 @@ class ChatViewModel(
                 _uiState.value =
                     _uiState.value.copy(
                         isOffline = false,
-                        inboxUsersAndRegisteredChannels = (inboxUsers.toSet() - channels.toSet()).toList() + channels
+                        inboxUsersAndRegisteredChannels = (inboxUsers.toSet() - channels.toSet()).map {
+                            InboxOrChannelEntry(from = it, isInbox = true)
+                        }.toList()
+                                + channels.map { InboxOrChannelEntry(from = it, isInbox = false) }
+                            .toList()
                     )
             } catch (e: Exception) {
                 Toast.makeText(
@@ -188,8 +206,12 @@ class ChatViewModel(
 
                 _uiState.value = _uiState.value.copy(
                     isOffline = true,
-                    inboxUsersAndRegisteredChannels = chatDao
+                    inboxUsersAndRegisteredChannels = inboxDao.getAll().map {
+                        InboxOrChannelEntry(from = it, isInbox = true)
+                    }.toList() + chatDao
                         .getAllChannels()
+                        .map { InboxOrChannelEntry(from = it, isInbox = false) }
+                        .toList()
                 )
             }
         }

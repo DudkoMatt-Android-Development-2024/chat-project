@@ -1,7 +1,6 @@
 package com.github.dudkomatt.androidcourse.chatproject.data.paging
 
 import android.app.Application
-import android.util.Log
 import android.widget.Toast
 import androidx.paging.ExperimentalPagingApi
 import androidx.paging.LoadType
@@ -44,92 +43,59 @@ class MessageRemoteMediator(
         return try {
             val lastKnownId: Int? = when (loadType) {
                 LoadType.REFRESH -> {
-//                    Log.d("TAG", "load: REFRESH")
                     mediatorStateFlow.emit(MediatorState.Loading)
                     null
                 }
 
                 LoadType.PREPEND -> {
-//                    Log.d("TAG", "load: PREPEND")
                     mediatorStateFlow.emit(MediatorState.Done)
                     return MediatorResult.Success(endOfPaginationReached = true)
                 }
 
                 LoadType.APPEND -> {
-//                    Log.d("TAG", "load: APPEND")
                     mediatorStateFlow.emit(MediatorState.Loading)
 
-                    val toUsernameOrChannel = when (messageSource) {
-                        is MessageSource.ChannelOrUser -> messageSource.channelOrUser
-                        is MessageSource.Inbox -> messageSource.username
-                    }
-
                     database.withTransaction {
-                        messageDao.getMax(toUsernameOrChannel)
+                        when (messageSource) {
+                            is MessageSource.ChannelOrUser -> messageDao.getMax(channelOrUsername = messageSource.channelOrUser)
+                            is MessageSource.Inbox -> messageDao.getMaxInbox(
+                                myUsername = messageSource.myUsername,
+                                anotherUsername = messageSource.anotherUsername
+                            )
+                        }
                     }
-
-//                    var max: Int = -1
-//                    database.withTransaction {
-//                        max = messageDao.getMax(toUsernameOrChannel)
-//                    }
-//
-//
-//                    Log.d("TAG", "load: APPEND - max: ${max}")
-//
-//                    Log.d("TAG", "load: APPEND")
-//
-//                    val lastItem = state.lastItemOrNull()
-//
-//                    if (lastItem == null) {
-//                        Log.d("TAG", "load: APPEND EXIT - last item is null")
-//
-//                        return MediatorResult.Success(
-//                            endOfPaginationReached = true
-//                        )
-//                    }
-//
-//                    Log.d("TAG", "load: ${state}")
-//                    Log.d("TAG", "load: ${lastItem.id}")
-//
-//                    lastItem.id
                 }
             }
 
             val pageKey = lastKnownId ?: 0
-
-            val toUsernameOrChannel = when (messageSource) {
-                is MessageSource.ChannelOrUser -> messageSource.channelOrUser
-                is MessageSource.Inbox -> messageSource.username
-            }
-
             val pageSize = state.config.pageSize
-
-//            Log.d("TAG", "load: BEFORE CALL NETWORK")
 
             val response = when (messageSource) {
                 is MessageSource.ChannelOrUser -> networkMessageRepository.getFromChannel(
                     limit = pageSize,
-                    channelName = toUsernameOrChannel,
+                    channelName = messageSource.channelOrUser,
                     lastKnownId = pageKey
                 )
 
                 is MessageSource.Inbox -> networkMessageRepository.getUserInbox(
                     limit = pageSize,
-                    username = toUsernameOrChannel,
+                    username = messageSource.myUsername,
                     lastKnownId = pageKey
-                )
+                ).filter {
+                    (it.to == messageSource.myUsername && it.from == messageSource.anotherUsername) ||
+                            (it.to == messageSource.anotherUsername && it.from == messageSource.myUsername)
+                }
             }
-
-//            Log.d("TAG", "load: AFTER CALL NETWORK")
-//
-//            Log.d("TAG", "load: ${response}")
-//            Log.d("TAG", "load: ${response.size}")
-//            if (response.size > 0)
-//            Log.d("TAG", "load: ${response[response.size - 1].id}")
 
             database.withTransaction {
                 if (loadType == LoadType.REFRESH) {
-                    messageDao.deleteAllBy(toUsernameOrChannel)
+                    when (messageSource) {
+                        is MessageSource.ChannelOrUser -> messageDao.deleteAllBy(channelOrUsername = messageSource.channelOrUser)
+                        is MessageSource.Inbox -> messageDao.deleteAllByInbox(
+                            myUsername = messageSource.myUsername,
+                            anotherUsername = messageSource.anotherUsername
+                        )
+                    }
                 }
 
                 val entities = response.map { it.toMessageEntity() }
@@ -147,7 +113,6 @@ class MessageRemoteMediator(
                 endOfPaginationReached = endOfPaginationReached
             )
         } catch (e: Exception) {
-//            Log.d("TAG", "load: ERROR MEDIATOR ${e.message}")
             Toast.makeText(
                 application.applicationContext,
                 "MediatorResult.Error. Error: ${e.message}",

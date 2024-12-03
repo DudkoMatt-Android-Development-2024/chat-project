@@ -32,6 +32,7 @@ import com.github.dudkomatt.androidcourse.chatproject.ui.screen.component.Offlin
 import com.github.dudkomatt.androidcourse.chatproject.ui.screen.component.ThumbProfileClickableImage
 import com.github.dudkomatt.androidcourse.chatproject.ui.screen.component.TopAppBar
 import com.github.dudkomatt.androidcourse.chatproject.ui.screen.loading.LoadingScreen
+import com.github.dudkomatt.androidcourse.chatproject.viewmodel.InboxOrChannelEntry
 
 @Composable
 fun ChatListVertical(
@@ -41,8 +42,8 @@ fun ChatListVertical(
     onLogoutClick: () -> Unit,
     onRefreshClick: () -> Unit,
     onCreateNewChatClick: () -> Unit,
-    onChatClick: (String) -> Unit,
-    inboxUsersAndChannels: List<String>?,
+    onChatClick: (InboxOrChannelEntry) -> Unit,
+    inboxUsersAndChannels: List<InboxOrChannelEntry>?,
     modifier: Modifier = Modifier,
 ) {
     Scaffold(
@@ -68,10 +69,10 @@ fun ChatListVertical(
                 verticalArrangement = Arrangement.spacedBy(4.dp),
                 state = lazyListState
             ) {
-                items(inboxUsersAndChannels, key = { it }) {
+                items(inboxUsersAndChannels, key = { it.from }) {
                     UserEntry(
-                        username = it,
-                        isSelected = selectedUsername == it,
+                        username = it.from,
+                        isSelected = selectedUsername == it.from,
                         modifier = Modifier.clickable { onChatClick(it) }
                     )
                 }
@@ -186,7 +187,7 @@ fun ChatListVerticalPreview() {
         onChatClick = {},
         inboxUsersAndChannels = (1..20).map {
             "From $it"
-        },
+        }.map { InboxOrChannelEntry(from = it, isInbox = true) },
         selectedUsername = "From 1",
         lazyListState = LazyListState()
     )

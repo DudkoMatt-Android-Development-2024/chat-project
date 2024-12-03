@@ -4,7 +4,7 @@ import com.github.dudkomatt.androidcourse.chatproject.model.retrofit.response.Me
 import com.github.dudkomatt.androidcourse.chatproject.network.MessageApi
 
 sealed interface MessageSource {
-    data class Inbox(val username: String) : MessageSource
+    data class Inbox(val myUsername: String, val anotherUsername: String) : MessageSource
     data class ChannelOrUser(val channelOrUser: String) : MessageSource
 }
 
