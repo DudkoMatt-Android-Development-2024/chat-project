@@ -11,6 +11,7 @@ import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import com.github.dudkomatt.androidcourse.chatproject.data.NetworkMessagePostRepository
+import com.github.dudkomatt.androidcourse.chatproject.data.UserSessionRepository
 import com.github.dudkomatt.androidcourse.chatproject.data.paging.MediatorState
 import com.github.dudkomatt.androidcourse.chatproject.data.paging.NetworkMessageRepository
 import com.github.dudkomatt.androidcourse.chatproject.data.paging.MessageSource
@@ -56,7 +57,7 @@ class ChatViewModel(
     private val infoApi: InfoApi,
     private val retrofitMessageApi: MessageApi,
     private val database: AppDatabase,
-    private val rootViewModel: RootViewModel,
+    private val userSessionRepository: UserSessionRepository,
     private val networkMessagePostRepository: NetworkMessagePostRepository
 ) : ViewModel() {
 
@@ -80,10 +81,6 @@ class ChatViewModel(
         pageSize = 20,
     )
 
-    init {
-        refresh()
-    }
-
     fun setIsNewChatScreen() {
         _uiState.value = _uiState.value.copy(selectedUiSubScreen = SelectedUiSubScreen.NewChat)
     }
@@ -101,58 +98,69 @@ class ChatViewModel(
         )
     }
 
+    fun logOut() {
+        _uiState.value = ChatUiState()
+    }
+
     @OptIn(ExperimentalPagingApi::class)
     fun setSelectedChatEntry(selectedEntry: InboxOrChannelEntry) {
-        val token = rootViewModel.uiState.value.token ?: return
-        val username = rootViewModel.uiState.value.username ?: return
-        val networkMessageRepository = NetworkMessageRepository(
-            retrofitMessageApi = retrofitMessageApi,
-            token = token,
-        )
+        viewModelScope.launch {
+            val token = userSessionRepository.getToken()
+            val username = userSessionRepository.getUsername()
 
-        val messageSource = if (selectedEntry.isInbox) MessageSource.Inbox(
-            myUsername = username,
-            anotherUsername = selectedEntry.from
-        ) else MessageSource.ChannelOrUser(selectedEntry.from)
 
-        _uiState.value =
-            _uiState.value.copy(selectedUiSubScreen = SelectedUiSubScreen.Conversation(
-                selectedUsername = selectedEntry.from,
-                pagingDataFlow = Pager(
-                    config = pagingConfig,
-                    initialKey = 0,
-                    remoteMediator = MessageRemoteMediator(
-                        application = application,
-                        messageSource = messageSource,
-                        database = database,
-                        networkMessageRepository = networkMessageRepository,
-                        mediatorStateFlow = _mediatorStateFlow
-                    ),
-                    pagingSourceFactory = {
-                        if (selectedEntry.isInbox) {
-                            database.messageDao().getByInbox(
-                                myUsername = username,
-                                anotherUsername = selectedEntry.from
-                            )
-                        } else {
-                            database.messageDao().getBy(channelOrUsername = selectedEntry.from)
+            if (token == null) return@launch
+            if (username == null) return@launch
+
+            val networkMessageRepository = NetworkMessageRepository(
+                retrofitMessageApi = retrofitMessageApi,
+                token = token,
+            )
+
+            val messageSource = if (selectedEntry.isInbox) MessageSource.Inbox(
+                myUsername = username,
+                anotherUsername = selectedEntry.from
+            ) else MessageSource.ChannelOrUser(selectedEntry.from)
+
+            _uiState.value =
+                _uiState.value.copy(selectedUiSubScreen = SelectedUiSubScreen.Conversation(
+                    selectedUsername = selectedEntry.from,
+                    pagingDataFlow = Pager(
+                        config = pagingConfig,
+                        initialKey = 0,
+                        remoteMediator = MessageRemoteMediator(
+                            application = application,
+                            messageSource = messageSource,
+                            database = database,
+                            networkMessageRepository = networkMessageRepository,
+                            mediatorStateFlow = _mediatorStateFlow
+                        ),
+                        pagingSourceFactory = {
+                            if (selectedEntry.isInbox) {
+                                database.messageDao().getByInbox(
+                                    myUsername = username,
+                                    anotherUsername = selectedEntry.from
+                                )
+                            } else {
+                                database.messageDao().getBy(channelOrUsername = selectedEntry.from)
+                            }
                         }
-                    }
-                ).flow.cachedIn(viewModelScope)
-            ))
+                    ).flow.cachedIn(viewModelScope)
+                ))
+        }
     }
 
     fun sendMessage(text: String) {
-        val fromUsername = rootViewModel.uiState.value.username ?: return
-        val toUsername = when (val selectedUiSubScreen = _uiState.value.selectedUiSubScreen) {
-            is SelectedUiSubScreen.Conversation -> MessageSource.ChannelOrUser(
-                selectedUiSubScreen.selectedUsername
-            )
-
-            else -> return
-        }.channelOrUser
-
         viewModelScope.launch {
+            val fromUsername = userSessionRepository.getToken() ?: return@launch
+            val toUsername = when (val selectedUiSubScreen = _uiState.value.selectedUiSubScreen) {
+                is SelectedUiSubScreen.Conversation -> MessageSource.ChannelOrUser(
+                    selectedUiSubScreen.selectedUsername
+                )
+
+                else -> return@launch
+            }.channelOrUser
+
             networkMessagePostRepository.postMessage(
                 TextMessageRequest(
                     from = fromUsername,
@@ -164,6 +172,7 @@ class ChatViewModel(
                 ),
             )
         }
+
     }
 
     fun showFullImage(imageUrl: String) {
@@ -174,7 +183,6 @@ class ChatViewModel(
         _uiState.value = _uiState.value.copy(fullscreenImageUrl = null)
     }
 
-    @OptIn(ExperimentalPagingApi::class)
     fun refresh() {
         viewModelScope.launch {
             try {
@@ -192,7 +200,7 @@ class ChatViewModel(
                     channels.map { ChatEntity(from = it, isChannel = true) })
 
                 // Get /inbox
-                val username = rootViewModel.uiState.value.username
+                val username = userSessionRepository.getUsername()
                 var inboxUsers: List<String> = listOf()
                 if (username != null) {
                     val inboxMessages = getInbox(username)
@@ -237,7 +245,7 @@ class ChatViewModel(
         var lastKnownId = 0
         val resultMessages: MutableList<MessageModel> = mutableListOf()
 
-        val token = rootViewModel.uiState.value.token ?: return listOf()
+        val token = userSessionRepository.getToken() ?: return listOf()
         val networkMessageRepository = NetworkMessageRepository(
             retrofitMessageApi = retrofitMessageApi,
             token = token,

@@ -11,6 +11,7 @@ import androidx.compose.ui.Modifier
 import com.github.dudkomatt.androidcourse.chatproject.ui.screen.chat.ChatScreen
 import com.github.dudkomatt.androidcourse.chatproject.ui.screen.loading.LoadingScreen
 import com.github.dudkomatt.androidcourse.chatproject.ui.screen.login.LoginScreen
+import com.github.dudkomatt.androidcourse.chatproject.viewmodel.ChatViewModel
 import com.github.dudkomatt.androidcourse.chatproject.viewmodel.LoginViewModel
 import com.github.dudkomatt.androidcourse.chatproject.viewmodel.RootViewModel
 import org.koin.androidx.compose.koinViewModel
@@ -24,20 +25,22 @@ fun ChatApp() {
                 .padding(innerPadding)
         ) {
             val rootViewModel: RootViewModel = koinViewModel()
+            val chatViewModel: ChatViewModel = koinViewModel()
             val uiState by rootViewModel.uiState.collectAsState()
 
             if (uiState.isLoading) {
                 LoadingScreen()
-            }
-            else if (!uiState.isLoggedIn()) {
+            } else if (!uiState.isLoggedIn()) {
                 LoginScreen()
-            }
-            else {
+            } else {
                 val username = uiState.username
                 if (username != null) {
                     ChatScreen(
                         username = username,
-                        onLogoutClick = rootViewModel::logOut,
+                        onLogoutClick = {
+                            rootViewModel.logOut()
+                            chatViewModel.logOut()
+                        },
                     )
                 } else {
                     LoginScreen()

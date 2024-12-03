@@ -5,12 +5,11 @@ import com.github.dudkomatt.androidcourse.chatproject.model.retrofit.request.Tex
 import com.github.dudkomatt.androidcourse.chatproject.model.room.MessageEntity
 import com.github.dudkomatt.androidcourse.chatproject.network.MessageApi
 import com.github.dudkomatt.androidcourse.chatproject.room.AppDatabase
-import com.github.dudkomatt.androidcourse.chatproject.viewmodel.RootViewModel
 import okhttp3.RequestBody
 
 class NetworkMessagePostRepository(
     private val retrofitMessageApi: MessageApi,
-    private val rootViewModel: RootViewModel,
+    private val userSessionRepository: UserSessionRepository,
     private val database: AppDatabase
 ) {
     private val messageDao = database.messageDao()
@@ -18,7 +17,7 @@ class NetworkMessagePostRepository(
     suspend fun postMessage(
         textMessage: TextMessageRequest,
     ): Int? {
-        val token = rootViewModel.uiState.value.token ?: return null
+        val token = userSessionRepository.getToken() ?: return null
         val response = retrofitMessageApi.postMessage(
             token = token,
             textMessage = textMessage
@@ -46,7 +45,7 @@ class NetworkMessagePostRepository(
         textMessage: TextMessageRequest,
         image: RequestBody,
     ): Int? {
-        val token = rootViewModel.uiState.value.token ?: return null
+        val token = userSessionRepository.getToken() ?: return null
         val response = retrofitMessageApi.postMessage(
             token = token,
             textMessage = textMessage,

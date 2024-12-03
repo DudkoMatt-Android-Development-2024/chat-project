@@ -33,6 +33,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.github.dudkomatt.androidcourse.chatproject.R
+import com.github.dudkomatt.androidcourse.chatproject.viewmodel.ChatViewModel
 import com.github.dudkomatt.androidcourse.chatproject.viewmodel.LoginViewModel
 import com.github.dudkomatt.androidcourse.chatproject.viewmodel.RootViewModel
 import org.koin.androidx.compose.koinViewModel
@@ -44,6 +45,7 @@ fun LoginScreen(
     val scrollState = rememberScrollState()
     val rootViewModel: RootViewModel = koinViewModel()
     val loginViewModel: LoginViewModel = koinViewModel()
+    val chatViewModel: ChatViewModel = koinViewModel()
 
     val uiState by loginViewModel.uiState.collectAsState()
 
@@ -92,6 +94,7 @@ fun LoginScreen(
             onClick = {
                 loginViewModel.onSignIn(context) {
                     rootViewModel.retrieveUsernameAndToken()
+                    chatViewModel.refresh()
                 }
             }
         )

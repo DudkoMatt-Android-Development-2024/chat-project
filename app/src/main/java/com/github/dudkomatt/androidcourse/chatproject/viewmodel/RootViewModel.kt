@@ -59,6 +59,7 @@ class RootViewModel(
             }
 
             userSessionRepository.removeUserInfo()
+            _uiState.value = RootUIState()
             retrieveUsernameAndToken()
         }
     }
