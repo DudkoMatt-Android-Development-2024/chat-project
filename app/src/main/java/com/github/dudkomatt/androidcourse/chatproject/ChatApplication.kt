@@ -9,11 +9,12 @@ import coil3.memory.MemoryCache
 import coil3.request.crossfade
 import com.github.dudkomatt.androidcourse.chatproject.config.RetrofitConfig
 import com.github.dudkomatt.androidcourse.chatproject.config.RoomConfigs
-import com.github.dudkomatt.androidcourse.chatproject.data.NetworkMessagePostRepository
 import com.github.dudkomatt.androidcourse.chatproject.data.DataStorePreferencesRepository
+import com.github.dudkomatt.androidcourse.chatproject.data.NetworkMessagePostRepository
 import com.github.dudkomatt.androidcourse.chatproject.viewmodel.ChatViewModel
-import com.github.dudkomatt.androidcourse.chatproject.viewmodel.RootViewModel
 import com.github.dudkomatt.androidcourse.chatproject.viewmodel.LoginViewModel
+import com.github.dudkomatt.androidcourse.chatproject.viewmodel.RootViewModel
+import com.github.dudkomatt.androidcourse.chatproject.viewmodel.ThemeViewModel
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
 import org.koin.core.context.startKoin
@@ -41,6 +42,7 @@ class ChatApplication : Application() {
             single { NetworkMessagePostRepository(get(), get(), get()) }
 
             // ViewModels
+            viewModelOf(::ThemeViewModel)
             viewModelOf(::RootViewModel)
             viewModelOf(::LoginViewModel)
             viewModelOf(::ChatViewModel)
