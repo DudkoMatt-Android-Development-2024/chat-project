@@ -229,6 +229,7 @@ fun RefreshButton(modifier: Modifier = Modifier, onRefreshClick: () -> Unit) {
                 color = MaterialTheme.colorScheme.onSurface,
             )
         }
+
         else -> {
             IconButton(
                 modifier = modifier,
@@ -258,30 +259,33 @@ fun MessageEntry(
             .fillMaxWidth(),
         horizontalArrangement = if (isOwnMessage) Arrangement.End else Arrangement.Start
     ) {
-        Surface(
-            modifier = Modifier
-                .fillMaxWidth(0.8f),
-            tonalElevation = 16.dp,
-            color = if (isOwnMessage) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary
-        ) {
-            Column(
-                modifier = Modifier.padding(8.dp)
+        Column {
+            Text(stringResource(R.string.from, message.from))
+            Surface(
+                modifier = Modifier
+                    .fillMaxWidth(0.8f),
+                tonalElevation = 16.dp,
+                color = if (isOwnMessage) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary
             ) {
-                if (message.text != null) {
-                    Text(
-                        text = message.text,
-                        style = MaterialTheme.typography.bodyMedium,
-                    )
-                }
+                Column(
+                    modifier = Modifier.padding(8.dp)
+                ) {
+                    if (message.text != null) {
+                        Text(
+                            text = message.text,
+                            style = MaterialTheme.typography.bodyMedium,
+                        )
+                    }
 
-                if (message.imageUrl != null) {
-                    AsyncImageComponent(
-                        modifier = Modifier.clickable {
-                            onImageClick(message.imageUrl)
-                        },
-                        imageUrl = message.imageUrl,
-                        isThumb = true,
-                    )
+                    if (message.imageUrl != null) {
+                        AsyncImageComponent(
+                            modifier = Modifier.clickable {
+                                onImageClick(message.imageUrl)
+                            },
+                            imageUrl = message.imageUrl,
+                            isThumb = true,
+                        )
+                    }
                 }
             }
         }

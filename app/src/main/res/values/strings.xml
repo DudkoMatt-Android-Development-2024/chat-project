@@ -25,4 +25,5 @@
     <string name="inbox_messages">Inbox messages</string>
     <string name="is_channel">Is channel?</string>
     <string name="create_a_new_channel_or_text_to_a_new_person">Create a new channel or text to a new person</string>
+    <string name="from">From: %1$s</string>
 </resources>
