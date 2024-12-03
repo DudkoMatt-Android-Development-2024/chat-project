@@ -11,7 +11,7 @@ import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import com.github.dudkomatt.androidcourse.chatproject.data.NetworkMessagePostRepository
-import com.github.dudkomatt.androidcourse.chatproject.data.paging.NetworkMessagePagingRepository
+import com.github.dudkomatt.androidcourse.chatproject.data.paging.NetworkMessageRepository
 import com.github.dudkomatt.androidcourse.chatproject.data.paging.MessageSource
 import com.github.dudkomatt.androidcourse.chatproject.data.paging.MessageRemoteMediator
 import com.github.dudkomatt.androidcourse.chatproject.model.retrofit.request.TextMessageRequest
@@ -20,19 +20,16 @@ import com.github.dudkomatt.androidcourse.chatproject.model.room.MessageEntity
 import com.github.dudkomatt.androidcourse.chatproject.network.InfoApi
 import com.github.dudkomatt.androidcourse.chatproject.network.MessageApi
 import com.github.dudkomatt.androidcourse.chatproject.room.AppDatabase
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 
 sealed interface SelectedUiSubScreen {
     data class Conversation(
         var selectedUsername: String,
-
+        var pagingDataFlow: Flow<PagingData<MessageEntity>>
     ) : SelectedUiSubScreen
     data object NewChat : SelectedUiSubScreen
 }
@@ -64,37 +61,6 @@ class ChatViewModel(
         pageSize = 20,
     )
 
-    @OptIn(ExperimentalCoroutinesApi::class, ExperimentalPagingApi::class)
-    val pagingDataFlow: Flow<PagingData<MessageEntity>> = uiState.flatMapLatest { state ->
-        val messageSource = when (val selectedUiSubScreen = state.selectedUiSubScreen) {
-            is SelectedUiSubScreen.Conversation -> MessageSource.ChannelOrUser(
-                selectedUiSubScreen.selectedUsername
-            )
-
-            else -> return@flatMapLatest flowOf()
-        }
-
-        val token = rootViewModel.uiState.value.token ?: return@flatMapLatest flowOf()
-        val networkMessagePagingRepository = NetworkMessagePagingRepository(
-            retrofitMessageApi = retrofitMessageApi,
-            token = token,
-        )
-
-        Pager(
-            config = pagingConfig,
-            initialKey = 0,
-            remoteMediator = MessageRemoteMediator(
-                messageSource = messageSource,
-                database = database,
-                networkMessagePagingRepository = networkMessagePagingRepository,
-                pagingConfig = pagingConfig,
-            ),
-            pagingSourceFactory = {
-                database.messageDao().getBy(messageSource.channelOrUser)
-            }
-        ).flow.cachedIn(viewModelScope)
-    }
-
     init {
         refreshChatList()
     }
@@ -107,9 +73,32 @@ class ChatViewModel(
         _uiState.value = _uiState.value.copy(selectedUiSubScreen = null)
     }
 
+    @OptIn(ExperimentalPagingApi::class)
     fun setSelectedUsername(username: String) {
+        val token = rootViewModel.uiState.value.token ?: return
+        val networkMessageRepository = NetworkMessageRepository(
+            retrofitMessageApi = retrofitMessageApi,
+            token = token,
+        )
+        val messageSource = MessageSource.ChannelOrUser(username)
+
         _uiState.value =
-            _uiState.value.copy(selectedUiSubScreen = SelectedUiSubScreen.Conversation(username))
+            _uiState.value.copy(selectedUiSubScreen = SelectedUiSubScreen.Conversation(
+                username,
+                Pager(
+                    config = pagingConfig,
+                    initialKey = 0,
+                    remoteMediator = MessageRemoteMediator(
+                        application = application,
+                        messageSource = messageSource,
+                        database = database,
+                        networkMessageRepository = networkMessageRepository,
+                    ),
+                    pagingSourceFactory = {
+                        database.messageDao().getBy(messageSource.channelOrUser)
+                    }
+                ).flow.cachedIn(viewModelScope)
+            ))
     }
 
     fun sendMessage(text: String) {

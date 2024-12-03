@@ -26,7 +26,7 @@ fun ChatScreenVertical(
                 onAttachImageClick = {},  // TODO - Attach images
                 onSendClick = chatViewModel::sendMessage,
                 loggedInUsername = username,
-                chatMessagesFlow = chatViewModel.pagingDataFlow,
+                chatMessagesFlow = subScreen.pagingDataFlow,
                 onImageClick = chatViewModel::showFullImage
             )
         }

@@ -1,29 +1,24 @@
 package com.github.dudkomatt.androidcourse.chatproject.data.paging
 
+import android.app.Application
 import android.util.Log
+import android.widget.Toast
 import androidx.paging.ExperimentalPagingApi
-import androidx.paging.LoadState.Loading.endOfPaginationReached
 import androidx.paging.LoadType
-import androidx.paging.PagingConfig
 import androidx.paging.PagingState
 import androidx.paging.RemoteMediator
 import androidx.room.withTransaction
-import com.github.dudkomatt.androidcourse.chatproject.data.paging.NetworkMessagePagingRepository.Companion.isEndOfPaginationReached
+import com.github.dudkomatt.androidcourse.chatproject.data.paging.NetworkMessageRepository.Companion.isEndOfPaginationReached
 import com.github.dudkomatt.androidcourse.chatproject.model.retrofit.response.toMessageEntity
 import com.github.dudkomatt.androidcourse.chatproject.model.room.MessageEntity
 import com.github.dudkomatt.androidcourse.chatproject.room.AppDatabase
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalPagingApi::class)
 class MessageRemoteMediator(
+    private val application: Application,
     private val messageSource: MessageSource?,
     private val database: AppDatabase,
-    private val networkMessagePagingRepository: NetworkMessagePagingRepository,
-    private val pagingConfig: PagingConfig
+    private val networkMessageRepository: NetworkMessageRepository,
 ) : RemoteMediator<Int, MessageEntity>() {
     private val messageDao = database.messageDao()
 
@@ -41,19 +36,51 @@ class MessageRemoteMediator(
         return try {
             val lastKnownId: Int? = when (loadType) {
                 LoadType.REFRESH -> {
+//                    Log.d("TAG", "load: REFRESH")
                     null
                 }
 
                 LoadType.PREPEND -> {
+//                    Log.d("TAG", "load: PREPEND")
                     return MediatorResult.Success(endOfPaginationReached = true)
                 }
 
                 LoadType.APPEND -> {
-                    val lastPage = state.pages.lastOrNull() ?: return MediatorResult.Success(
-                        endOfPaginationReached = true
-                    )
+//                    Log.d("TAG", "load: APPEND")
 
-                    lastPage.data.maxOfOrNull { it.id }
+                    val toUsernameOrChannel = when (messageSource) {
+                        is MessageSource.ChannelOrUser -> messageSource.channelOrUser
+                        is MessageSource.Inbox -> messageSource.username
+                    }
+
+                    database.withTransaction {
+                        messageDao.getMax(toUsernameOrChannel)
+                    }
+
+//                    var max: Int = -1
+//                    database.withTransaction {
+//                        max = messageDao.getMax(toUsernameOrChannel)
+//                    }
+//
+//
+//                    Log.d("TAG", "load: APPEND - max: ${max}")
+//
+//                    Log.d("TAG", "load: APPEND")
+//
+//                    val lastItem = state.lastItemOrNull()
+//
+//                    if (lastItem == null) {
+//                        Log.d("TAG", "load: APPEND EXIT - last item is null")
+//
+//                        return MediatorResult.Success(
+//                            endOfPaginationReached = true
+//                        )
+//                    }
+//
+//                    Log.d("TAG", "load: ${state}")
+//                    Log.d("TAG", "load: ${lastItem.id}")
+//
+//                    lastItem.id
                 }
             }
 
@@ -64,39 +91,53 @@ class MessageRemoteMediator(
                 is MessageSource.Inbox -> messageSource.username
             }
 
-            val pageSize = pagingConfig.pageSize
+            val pageSize = state.config.pageSize
+
+            Log.d("TAG", "load: BEFORE CALL NETWORK")
 
             val response = when (messageSource) {
-                is MessageSource.ChannelOrUser -> networkMessagePagingRepository.getFromChannel(
+                is MessageSource.ChannelOrUser -> networkMessageRepository.getFromChannel(
                     limit = pageSize,
                     channelName = toUsernameOrChannel,
                     lastKnownId = pageKey
                 )
 
-                is MessageSource.Inbox -> networkMessagePagingRepository.getUserInbox(
+                is MessageSource.Inbox -> networkMessageRepository.getUserInbox(
                     limit = pageSize,
                     username = toUsernameOrChannel,
                     lastKnownId = pageKey
                 )
             }
 
+//            Log.d("TAG", "load: AFTER CALL NETWORK")
+//
+//            Log.d("TAG", "load: ${response}")
+//            Log.d("TAG", "load: ${response.size}")
+//            if (response.size > 0)
+//            Log.d("TAG", "load: ${response[response.size - 1].id}")
+
             database.withTransaction {
                 if (loadType == LoadType.REFRESH) {
                     messageDao.deleteAllBy(toUsernameOrChannel)
                 }
 
-                messageDao.insertAll(
-                    response.map { it.toMessageEntity() }
-                )
+                val entities = response.map { it.toMessageEntity() }
+                messageDao.insertAll(entities)
             }
 
+            val endOfPaginationReached = isEndOfPaginationReached(
+                response = response
+            )
             MediatorResult.Success(
-                endOfPaginationReached = isEndOfPaginationReached(
-                    response = response,
-                    loadSize = pageSize
-                )
+                endOfPaginationReached = endOfPaginationReached
             )
         } catch (e: Exception) {
+//            Log.d("TAG", "load: ERROR MEDIATOR ${e.message}")
+            Toast.makeText(
+                application.applicationContext,
+                "MediatorResult.Error. Error: ${e.message}",
+                Toast.LENGTH_SHORT
+            ).show()
             MediatorResult.Error(e)
         }
     }

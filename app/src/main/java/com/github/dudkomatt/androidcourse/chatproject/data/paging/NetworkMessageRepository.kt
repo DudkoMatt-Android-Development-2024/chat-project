@@ -8,7 +8,7 @@ sealed interface MessageSource {
     data class ChannelOrUser(val channelOrUser: String) : MessageSource
 }
 
-class NetworkMessagePagingRepository(
+class NetworkMessageRepository(
     private val retrofitMessageApi: MessageApi,
     private val token: String,
 ) {
@@ -40,8 +40,8 @@ class NetworkMessagePagingRepository(
     }
 
     companion object {
-        fun isEndOfPaginationReached(response: List<Any>, loadSize: Int): Boolean {
-            return response.isEmpty() || response.size < loadSize
+        fun isEndOfPaginationReached(response: List<Any>): Boolean {
+            return response.isEmpty()
         }
     }
 }
