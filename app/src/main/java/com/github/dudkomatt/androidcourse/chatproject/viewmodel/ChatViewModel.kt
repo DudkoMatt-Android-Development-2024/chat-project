@@ -81,6 +81,10 @@ class ChatViewModel(
         pageSize = 20,
     )
 
+    init {
+        refresh()
+    }
+
     fun setIsNewChatScreen() {
         _uiState.value = _uiState.value.copy(selectedUiSubScreen = SelectedUiSubScreen.NewChat)
     }
@@ -186,6 +190,10 @@ class ChatViewModel(
     fun refresh() {
         viewModelScope.launch {
             try {
+                if (userSessionRepository.getUsername() == null || userSessionRepository.getToken() == null) {
+                    return@launch
+                }
+
                 _uiState.value =
                     _uiState.value.copy(isOffline = false, inboxUsersAndRegisteredChannels = null)
 
