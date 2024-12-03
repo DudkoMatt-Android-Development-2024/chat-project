@@ -11,9 +11,15 @@ interface ChatDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAll(chats: List<ChatEntity>)
 
-    @Query("SELECT * FROM chats")
-    suspend fun getAll(): List<ChatEntity>
+    @Query("SELECT `from` FROM chats WHERE NOT isChannel")
+    suspend fun getRegisteredUsers(): List<String>
 
-    @Query("DELETE FROM chats")
-    suspend fun clearAll()
+    @Query("SELECT `from` FROM chats WHERE isChannel")
+    suspend fun getAllChannels(): List<String>
+
+    @Query("DELETE FROM chats WHERE NOT isChannel")
+    suspend fun clearAllUsers()
+
+    @Query("DELETE FROM chats WHERE isChannel")
+    suspend fun clearAllChannels()
 }

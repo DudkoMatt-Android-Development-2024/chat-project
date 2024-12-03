@@ -3,9 +3,8 @@ package com.github.dudkomatt.androidcourse.chatproject.model.room
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
-@Entity(tableName = "chats")
-data class ChatEntity(
+@Entity(tableName = "inbox")
+data class InboxEntity (
     @PrimaryKey
-    val from: String,
-    val isChannel: Boolean,
+    val from: String
 )

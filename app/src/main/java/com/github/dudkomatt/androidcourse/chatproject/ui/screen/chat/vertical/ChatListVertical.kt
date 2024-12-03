@@ -12,9 +12,7 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Logout
-import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -44,21 +42,25 @@ fun ChatListVertical(
     onRefreshClick: () -> Unit,
     onCreateNewChatClick: () -> Unit,
     onChatClick: (String) -> Unit,
-    registeredUsersAndChannels: List<String>?,
+    inboxUsersAndChannels: List<String>?,
     modifier: Modifier = Modifier,
 ) {
     Scaffold(
         modifier = modifier,
-        topBar = { ChatListTopBar(
-            isOffline = isOffline,
-            onLogoutClick = onLogoutClick
-        ) },
-        floatingActionButton = { BottomFloatingActionButton(
-            onCreateNewChatClick = onCreateNewChatClick,
-            onRefreshClick = onRefreshClick,
-        ) }
+        topBar = {
+            ChatListTopBar(
+                isOffline = isOffline,
+                onLogoutClick = onLogoutClick
+            )
+        },
+        floatingActionButton = {
+            BottomFloatingActionButton(
+                onCreateNewChatClick = onCreateNewChatClick,
+                onRefreshClick = onRefreshClick,
+            )
+        }
     ) { innerPadding ->
-        if (registeredUsersAndChannels == null) {
+        if (inboxUsersAndChannels == null) {
             LoadingScreen()
         } else {
             LazyColumn(
@@ -66,7 +68,7 @@ fun ChatListVertical(
                 verticalArrangement = Arrangement.spacedBy(4.dp),
                 state = lazyListState
             ) {
-                items(registeredUsersAndChannels, key = { it }) {
+                items(inboxUsersAndChannels, key = { it }) {
                     UserEntry(
                         username = it,
                         isSelected = selectedUsername == it,
@@ -85,7 +87,7 @@ fun ChatListTopBar(
     onProfileImageClick: () -> Unit = {}  // TODO - Remove default
 ) {
     TopAppBar {
-        Row (
+        Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
@@ -94,7 +96,7 @@ fun ChatListTopBar(
                 text = stringResource(R.string.chats_screen_title),
                 style = MaterialTheme.typography.titleLarge
             )
-            Row (
+            Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(4.dp)
             ) {
@@ -125,7 +127,7 @@ fun BottomFloatingActionButton(
     onRefreshClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Column (
+    Column(
         verticalArrangement = Arrangement.spacedBy(24.dp),
     ) {
         FloatingActionButton(
@@ -182,7 +184,7 @@ fun ChatListVerticalPreview() {
         onRefreshClick = {},
         onCreateNewChatClick = {},
         onChatClick = {},
-        registeredUsersAndChannels = (1..20).map {
+        inboxUsersAndChannels = (1..20).map {
             "From $it"
         },
         selectedUsername = "From 1",

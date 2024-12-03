@@ -42,9 +42,9 @@ fun ChatScreenVertical(
                 isOffline = uiState.isOffline,
                 selectedUsername = null,
                 onLogoutClick = onLogoutClick,
-                onRefreshClick = chatViewModel::refreshChatList,
+                onRefreshClick = chatViewModel::refresh,
                 onCreateNewChatClick = chatViewModel::setIsNewChatScreen,
-                registeredUsersAndChannels = uiState.registeredUsersAndChannels,
+                inboxUsersAndChannels = uiState.inboxUsersAndRegisteredChannels,
                 onChatClick = chatViewModel::setSelectedUsername,
                 modifier = modifier,
                 lazyListState = chatViewModel.chatListScrollState

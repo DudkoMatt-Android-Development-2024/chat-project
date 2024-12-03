@@ -16,7 +16,10 @@ import com.github.dudkomatt.androidcourse.chatproject.data.paging.NetworkMessage
 import com.github.dudkomatt.androidcourse.chatproject.data.paging.MessageSource
 import com.github.dudkomatt.androidcourse.chatproject.data.paging.MessageRemoteMediator
 import com.github.dudkomatt.androidcourse.chatproject.model.retrofit.request.TextMessageRequest
+import com.github.dudkomatt.androidcourse.chatproject.model.retrofit.response.MessageModel
+import com.github.dudkomatt.androidcourse.chatproject.model.retrofit.response.toMessageEntity
 import com.github.dudkomatt.androidcourse.chatproject.model.room.ChatEntity
+import com.github.dudkomatt.androidcourse.chatproject.model.room.InboxEntity
 import com.github.dudkomatt.androidcourse.chatproject.model.room.MessageEntity
 import com.github.dudkomatt.androidcourse.chatproject.network.InfoApi
 import com.github.dudkomatt.androidcourse.chatproject.network.MessageApi
@@ -24,7 +27,6 @@ import com.github.dudkomatt.androidcourse.chatproject.room.AppDatabase
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
@@ -33,6 +35,7 @@ sealed interface SelectedUiSubScreen {
         var selectedUsername: String,
         var pagingDataFlow: Flow<PagingData<MessageEntity>>
     ) : SelectedUiSubScreen
+
     data object NewChat : SelectedUiSubScreen
 }
 
@@ -40,7 +43,7 @@ data class ChatUiState(
     var isOffline: Boolean = false,
     var fullscreenImageUrl: String? = null,
     var selectedUiSubScreen: SelectedUiSubScreen? = null,
-    var registeredUsersAndChannels: List<String>? = null,
+    var inboxUsersAndRegisteredChannels: List<String>? = null,
 )
 
 class ChatViewModel(
@@ -58,6 +61,8 @@ class ChatViewModel(
     private val _mediatorStateFlow = MutableStateFlow<MediatorState>(MediatorState.Loading)
     val mediatorStateFlow = _mediatorStateFlow.asStateFlow()
 
+    private val inboxDao = database.inboxDao()
+    private val messageDao = database.messageDao()
     private val chatDao = database.chatDao()
 
     val chatListScrollState = LazyListState()
@@ -67,7 +72,7 @@ class ChatViewModel(
     )
 
     init {
-        refreshChatList()
+        refresh()
     }
 
     fun setIsNewChatScreen() {
@@ -139,17 +144,38 @@ class ChatViewModel(
         _uiState.value = _uiState.value.copy(fullscreenImageUrl = null)
     }
 
-    fun refreshChatList() {
+    @OptIn(ExperimentalPagingApi::class)
+    fun refresh() {
         viewModelScope.launch {
             try {
                 _uiState.value =
-                    _uiState.value.copy(isOffline = false, registeredUsersAndChannels = null)
-                val registeredUsersAndChannels = infoApi.getUsers() + infoApi.getChannels()
-                chatDao.insertAll(registeredUsersAndChannels.map { ChatEntity(it) })
+                    _uiState.value.copy(isOffline = false, inboxUsersAndRegisteredChannels = null)
+
+                // Get users
+                val users = infoApi.getUsers()
+                chatDao.insertAll(
+                    users.map { ChatEntity(from = it, isChannel = false) })
+
+                // Get channels
+                val channels = infoApi.getChannels()
+                chatDao.insertAll(
+                    channels.map { ChatEntity(from = it, isChannel = true) })
+
+                // Get /inbox
+                val username = rootViewModel.uiState.value.username
+                var inboxUsers: List<String> = listOf()
+                if (username != null) {
+                    val inboxMessages = getInbox(username)
+                    inboxUsers = inboxMessages.flatMap { listOf(it.from, it.to) }
+                        .filter { it != username }
+                    inboxDao.insertAll(inboxUsers.map { InboxEntity(from = it) })
+                    messageDao.insertAll(inboxMessages.map { it.toMessageEntity() })
+                }
+
                 _uiState.value =
                     _uiState.value.copy(
                         isOffline = false,
-                        registeredUsersAndChannels = registeredUsersAndChannels
+                        inboxUsersAndRegisteredChannels = (inboxUsers.toSet() - channels.toSet()).toList() + channels
                     )
             } catch (e: Exception) {
                 Toast.makeText(
@@ -158,15 +184,43 @@ class ChatViewModel(
                     Toast.LENGTH_SHORT
                 ).show()
 
+//                Log.d("TAG", "refreshChannelListAndRegisteredUsers: ${e.message}")
+
                 _uiState.value = _uiState.value.copy(
                     isOffline = true,
-                    registeredUsersAndChannels = chatDao
-                        .getAll()
-                        .map {
-                            it.from
-                        }
+                    inboxUsersAndRegisteredChannels = chatDao
+                        .getAllChannels()
                 )
             }
         }
+    }
+
+    private suspend fun getInbox(username: String): List<MessageModel> {
+        var lastKnownId = 0
+        val resultMessages: MutableList<MessageModel> = mutableListOf()
+
+        val token = rootViewModel.uiState.value.token ?: return listOf()
+        val networkMessageRepository = NetworkMessageRepository(
+            retrofitMessageApi = retrofitMessageApi,
+            token = token,
+        )
+
+        while (true) {
+            val userInboxMessagesPage = networkMessageRepository.getUserInbox(
+                limit = pagingConfig.pageSize,
+                username = username,
+                lastKnownId = lastKnownId
+            )
+
+            resultMessages += userInboxMessagesPage
+
+            if (userInboxMessagesPage.size <= pagingConfig.pageSize) {
+                break
+            }
+
+            lastKnownId = userInboxMessagesPage.maxOf { it.id }
+        }
+
+        return resultMessages
     }
 }

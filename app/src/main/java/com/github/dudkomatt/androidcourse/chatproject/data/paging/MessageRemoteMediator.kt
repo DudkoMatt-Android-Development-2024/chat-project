@@ -104,7 +104,7 @@ class MessageRemoteMediator(
 
             val pageSize = state.config.pageSize
 
-            Log.d("TAG", "load: BEFORE CALL NETWORK")
+//            Log.d("TAG", "load: BEFORE CALL NETWORK")
 
             val response = when (messageSource) {
                 is MessageSource.ChannelOrUser -> networkMessageRepository.getFromChannel(
