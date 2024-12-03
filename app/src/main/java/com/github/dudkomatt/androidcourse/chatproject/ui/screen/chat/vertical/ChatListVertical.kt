@@ -13,6 +13,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.InvertColors
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -20,12 +21,15 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.github.dudkomatt.androidcourse.chatproject.R
+import com.github.dudkomatt.androidcourse.chatproject.data.ThemeState
 import com.github.dudkomatt.androidcourse.chatproject.ui.screen.component.ChatTitle
 import com.github.dudkomatt.androidcourse.chatproject.ui.screen.component.IconButtonWithCallback
 import com.github.dudkomatt.androidcourse.chatproject.ui.screen.component.OfflineIcon
@@ -33,6 +37,8 @@ import com.github.dudkomatt.androidcourse.chatproject.ui.screen.component.ThumbP
 import com.github.dudkomatt.androidcourse.chatproject.ui.screen.component.TopAppBar
 import com.github.dudkomatt.androidcourse.chatproject.ui.screen.loading.LoadingScreen
 import com.github.dudkomatt.androidcourse.chatproject.viewmodel.InboxOrChannelEntry
+import com.github.dudkomatt.androidcourse.chatproject.viewmodel.ThemeViewModel
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun ChatListVertical(
@@ -106,6 +112,23 @@ fun ChatListTopBar(
                         modifier = Modifier.padding(all = 4.dp)
                     )
                 }
+
+                val themeViewModel: ThemeViewModel = koinViewModel()
+                val themeUiState by themeViewModel.themeUiState.collectAsState()
+
+                IconButtonWithCallback(
+                    onImageClick = {
+                        when (themeUiState) {
+                            ThemeState.Dark -> themeViewModel.setThemeState(ThemeState.Light)
+                            ThemeState.Light -> themeViewModel.setThemeState(ThemeState.SystemDefault)
+                            ThemeState.SystemDefault -> themeViewModel.setThemeState(ThemeState.Dark)
+                        }
+                    },
+                    imageVector = Icons.Default.InvertColors,
+                    contentDescription = stringResource(R.string.change_theme_system_dark_light),
+                    tint = MaterialTheme.colorScheme.onSurface,
+                    enabled = true
+                )
                 IconButtonWithCallback(
                     onImageClick = onLogoutClick,
                     imageVector = Icons.AutoMirrored.Filled.Logout,

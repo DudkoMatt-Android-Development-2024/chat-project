@@ -1,5 +1,7 @@
 package com.github.dudkomatt.androidcourse.chatproject.viewmodel
 
+import android.app.Application
+import android.widget.Toast
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.github.dudkomatt.androidcourse.chatproject.data.DataStorePreferencesRepository
@@ -10,10 +12,11 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 class ThemeViewModel(
+    private val application: Application,
     private val dataStorePreferencesRepository: DataStorePreferencesRepository
 ) : ViewModel() {
 
-    private val _themeUiState =  MutableStateFlow<ThemeState>(ThemeState.SystemDefault)
+    private val _themeUiState = MutableStateFlow<ThemeState>(ThemeState.SystemDefault)
     val themeUiState: StateFlow<ThemeState> = _themeUiState.asStateFlow()
 
     init {
@@ -23,6 +26,11 @@ class ThemeViewModel(
     fun setThemeState(themeState: ThemeState) {
         viewModelScope.launch {
             dataStorePreferencesRepository.storeTheme(themeState)
+
+            Toast.makeText(
+                application.applicationContext, "Theme changed to: $themeState", Toast.LENGTH_SHORT
+            ).show()
+
             _themeUiState.value = themeState
         }
     }
