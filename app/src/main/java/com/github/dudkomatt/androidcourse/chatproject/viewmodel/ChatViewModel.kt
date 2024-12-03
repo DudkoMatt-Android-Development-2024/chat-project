@@ -10,12 +10,13 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
-import com.github.dudkomatt.androidcourse.chatproject.data.NetworkMessagePostRepository
+import com.github.dudkomatt.androidcourse.chatproject.R
 import com.github.dudkomatt.androidcourse.chatproject.data.DataStorePreferencesRepository
+import com.github.dudkomatt.androidcourse.chatproject.data.NetworkMessagePostRepository
 import com.github.dudkomatt.androidcourse.chatproject.data.paging.MediatorState
-import com.github.dudkomatt.androidcourse.chatproject.data.paging.NetworkMessageRepository
-import com.github.dudkomatt.androidcourse.chatproject.data.paging.MessageSource
 import com.github.dudkomatt.androidcourse.chatproject.data.paging.MessageRemoteMediator
+import com.github.dudkomatt.androidcourse.chatproject.data.paging.MessageSource
+import com.github.dudkomatt.androidcourse.chatproject.data.paging.NetworkMessageRepository
 import com.github.dudkomatt.androidcourse.chatproject.model.retrofit.request.TextMessageRequest
 import com.github.dudkomatt.androidcourse.chatproject.model.retrofit.response.MessageModel
 import com.github.dudkomatt.androidcourse.chatproject.model.retrofit.response.toMessageEntity
@@ -230,12 +231,12 @@ class ChatViewModel(
             } catch (e: Exception) {
                 Toast.makeText(
                     application.applicationContext,
-                    "Registered users and channels fetch failed. Error: ${e.message}",
+                    application.applicationContext.getString(
+                        R.string.registered_users_and_channels_fetch_failed_error,
+                        e.message
+                    ),
                     Toast.LENGTH_SHORT
                 ).show()
-
-//                Log.d("TAG", "refreshChannelListAndRegisteredUsers: ${e.message}")
-
                 _uiState.value = _uiState.value.copy(
                     isOffline = true,
                     inboxUsersAndRegisteredChannels = inboxDao.getAll().map {

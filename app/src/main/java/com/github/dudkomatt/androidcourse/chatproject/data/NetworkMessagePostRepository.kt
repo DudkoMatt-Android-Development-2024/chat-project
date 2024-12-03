@@ -1,6 +1,8 @@
 package com.github.dudkomatt.androidcourse.chatproject.data
 
+import android.app.Application
 import androidx.room.withTransaction
+import com.github.dudkomatt.androidcourse.chatproject.R
 import com.github.dudkomatt.androidcourse.chatproject.model.retrofit.request.TextMessageRequest
 import com.github.dudkomatt.androidcourse.chatproject.model.room.MessageEntity
 import com.github.dudkomatt.androidcourse.chatproject.network.MessageApi
@@ -8,6 +10,7 @@ import com.github.dudkomatt.androidcourse.chatproject.room.AppDatabase
 import okhttp3.RequestBody
 
 class NetworkMessagePostRepository(
+    private val application: Application,
     private val retrofitMessageApi: MessageApi,
     private val dataStorePreferencesRepository: DataStorePreferencesRepository,
     private val database: AppDatabase
@@ -60,7 +63,7 @@ class NetworkMessagePostRepository(
                         from = textMessage.from,
                         to = textMessage.to,
                         imageUrl = null,
-                        text = textMessage.data.text?.text + " <THIS MESSAGE CONTAINS AN IMAGE - REFRESH CHAT TO VIEW IT>",
+                        text = textMessage.data.text?.text + application.applicationContext.getString(R.string.this_message_contains_an_image_refresh_chat_to_view_it),
                         time = System.currentTimeMillis()
                     )
                 )

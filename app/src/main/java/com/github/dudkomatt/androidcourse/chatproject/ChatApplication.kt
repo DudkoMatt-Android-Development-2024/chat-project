@@ -39,7 +39,7 @@ class ChatApplication : Application() {
             single { RoomConfigs.createRoomDb(androidContext()) }
 
             // Repository
-            single { NetworkMessagePostRepository(get(), get(), get()) }
+            single { NetworkMessagePostRepository(get(), get(), get(), get()) }
 
             // ViewModels
             viewModelOf(::ThemeViewModel)

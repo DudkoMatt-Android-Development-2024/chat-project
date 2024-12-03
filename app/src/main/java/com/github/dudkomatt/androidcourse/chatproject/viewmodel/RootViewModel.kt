@@ -1,9 +1,7 @@
 package com.github.dudkomatt.androidcourse.chatproject.viewmodel
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.github.dudkomatt.androidcourse.chatproject.config.LogConfig
 import com.github.dudkomatt.androidcourse.chatproject.data.DataStorePreferencesRepository
 import com.github.dudkomatt.androidcourse.chatproject.network.AuthApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -50,11 +48,6 @@ class RootViewModel(
                     authApi.logoutPost(it)
                 } catch (e: Exception) {
                     // Ignore any errors
-                    Log.e(
-                        LogConfig.ERROR_LOGOUT_TAG,
-                        "logOut: Exception occurred. Resetting UI state",
-                        e
-                    )
                 }
             }
 

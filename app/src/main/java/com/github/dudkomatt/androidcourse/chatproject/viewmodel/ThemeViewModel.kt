@@ -4,6 +4,7 @@ import android.app.Application
 import android.widget.Toast
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.github.dudkomatt.androidcourse.chatproject.R
 import com.github.dudkomatt.androidcourse.chatproject.data.DataStorePreferencesRepository
 import com.github.dudkomatt.androidcourse.chatproject.data.ThemeState
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -28,7 +29,8 @@ class ThemeViewModel(
             dataStorePreferencesRepository.storeTheme(themeState)
 
             Toast.makeText(
-                application.applicationContext, "Theme changed to: $themeState", Toast.LENGTH_SHORT
+                application.applicationContext,
+                application.applicationContext.getString(R.string.theme_changed_to, themeState), Toast.LENGTH_SHORT
             ).show()
 
             _themeUiState.value = themeState

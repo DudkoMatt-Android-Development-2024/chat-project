@@ -27,4 +27,12 @@
     <string name="create_a_new_channel_or_text_to_a_new_person">Create a new channel or text to a new person</string>
     <string name="from">From: %1$s</string>
     <string name="change_theme_system_dark_light"><![CDATA[Change theme System -> Dark -> Light]]></string>
+    <string name="mediatorresult_error_error">MediatorResult.Error. Error: %1$s</string>
+    <string name="this_message_contains_an_image_refresh_chat_to_view_it"><![CDATA[" <THIS MESSAGE CONTAINS AN IMAGE - REFRESH CHAT TO VIEW IT>"]]></string>
+    <string name="cannot_load_a_data_without_a_defined_source">Cannot load a data without a defined source</string>
+    <string name="registered_users_and_channels_fetch_failed_error">Registered users and channels fetch failed. Error: %1$s</string>
+    <string name="returned_password_is_null">Returned password is null</string>
+    <string name="registration_success_response">Registration success. Response: %1$s</string>
+    <string name="registration_failed_error">Registration failed. Error: %1$s</string>
+    <string name="theme_changed_to">Theme changed to: %1$s</string>
 </resources>

@@ -7,6 +7,7 @@ import androidx.paging.LoadType
 import androidx.paging.PagingState
 import androidx.paging.RemoteMediator
 import androidx.room.withTransaction
+import com.github.dudkomatt.androidcourse.chatproject.R
 import com.github.dudkomatt.androidcourse.chatproject.data.paging.NetworkMessageRepository.Companion.isEndOfPaginationReached
 import com.github.dudkomatt.androidcourse.chatproject.model.retrofit.response.toMessageEntity
 import com.github.dudkomatt.androidcourse.chatproject.model.room.MessageEntity
@@ -36,7 +37,7 @@ class MessageRemoteMediator(
     ): MediatorResult {
         if (messageSource == null) {
             return MediatorResult.Error(
-                IllegalStateException("Cannot load a data without a defined source")
+                IllegalStateException(application.applicationContext.getString(R.string.cannot_load_a_data_without_a_defined_source))
             )
         }
 
@@ -115,7 +116,7 @@ class MessageRemoteMediator(
         } catch (e: Exception) {
             Toast.makeText(
                 application.applicationContext,
-                "MediatorResult.Error. Error: ${e.message}",
+                application.applicationContext.getString(R.string.mediatorresult_error_error, e.message),
                 Toast.LENGTH_SHORT
             ).show()
             mediatorStateFlow.emit(MediatorState.Error)

@@ -19,9 +19,9 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun ChatListEntry(
-    from: String = "From",  // TODO - Remove defaults
-    lastMessage: String = "Last message",  // TODO - Remove defaults
-    onImageClick: () -> Unit = {},  // TODO - Remove defaults
+    from: String,
+    lastMessage: String,
+    onImageClick: () -> Unit,
     onChatClick: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {

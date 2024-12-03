@@ -17,7 +17,7 @@ import com.github.dudkomatt.androidcourse.chatproject.R
 fun ThumbProfileClickableImage(
     onImageClick: () -> Unit = {},  // TODO - Remove defaults
     drawableResource: Int = R.drawable.ic_launcher_foreground,  // TODO - Remove defaults
-    description: String = "Description",  // TODO - Remove defaults
+    description: String? = null,
     modifier: Modifier = Modifier,
 ) {
     IconButton(
@@ -34,7 +34,7 @@ fun ThumbProfileClickableImage(
 @Composable
 fun ThumbProfileImage(
     drawableResource: Int = R.drawable.ic_launcher_foreground,  // TODO - Remove defaults
-    description: String = "Description",  // TODO - Remove defaults
+    description: String? = null,
     modifier: Modifier = Modifier
 ) {
     Image(

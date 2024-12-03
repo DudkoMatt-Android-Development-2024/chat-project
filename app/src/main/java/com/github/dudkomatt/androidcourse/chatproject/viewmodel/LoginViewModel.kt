@@ -4,6 +4,7 @@ import android.content.Context
 import android.widget.Toast
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.github.dudkomatt.androidcourse.chatproject.R
 import com.github.dudkomatt.androidcourse.chatproject.data.DataStorePreferencesRepository
 import com.github.dudkomatt.androidcourse.chatproject.model.retrofit.request.LoginRequest
 import com.github.dudkomatt.androidcourse.chatproject.network.AuthApi
@@ -72,14 +73,16 @@ class LoginViewModel(
             try {
                 val responsePassword: String =
                     authApi.registerNewUser(_uiState.value.username).body()?.string()
-                        ?: throw Exception("Returned password is null")
+                        ?: throw Exception(context.getString(R.string.returned_password_is_null))
 
                 Toast.makeText(
-                    context, "Registration success. Response: $responsePassword", Toast.LENGTH_LONG
+                    context,
+                    context.getString(R.string.registration_success_response, responsePassword), Toast.LENGTH_LONG
                 ).show()
             } catch (e: Exception) {
                 Toast.makeText(
-                    context, "Registration failed. Error: ${e.message}", Toast.LENGTH_SHORT
+                    context,
+                    context.getString(R.string.registration_failed_error, e.message), Toast.LENGTH_SHORT
                 ).show()
             }
         }
